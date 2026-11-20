@@ -69,6 +69,12 @@ export default function Hero() {
     ...((branding.region || branding.city) ? [{ value: branding.region || branding.city, label: t.hero.stats.location, icon: '📍' }] : []),
   ];
 
+  const statsGridClass =
+    stats.length === 1 ? 'grid-cols-1 max-w-[12rem] mx-auto'
+    : stats.length === 2 ? 'grid-cols-2 max-w-lg mx-auto'
+    : stats.length === 3 ? 'grid-cols-2 lg:grid-cols-3'
+    : 'grid-cols-2 lg:grid-cols-4';
+
   const next = useCallback(() => {
     setDir(1);
     setCurrent(i => (slides.length ? (i + 1) % slides.length : 0));
@@ -394,7 +400,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55 }}
-          className={`mt-16 grid gap-4 ${stats.length === 1 ? 'grid-cols-1 max-w-[12rem] mx-auto' : 'grid-cols-2'} ${stats.length === 2 ? 'max-w-lg mx-auto' : stats.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`}
+          className={`mt-16 grid gap-4 ${statsGridClass}`}
         >
           {stats.map((st, i) => (
             <motion.div
