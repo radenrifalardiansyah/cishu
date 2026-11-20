@@ -39,7 +39,7 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
     <footer className={`relative bg-brand-800 overflow-hidden ${fullOnMobile ? 'block' : 'hidden md:block'}`}>
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-500/60 to-transparent" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-10 md:py-14 max-md:pb-28">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <motion.div
@@ -208,7 +208,7 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
         <div className="mt-12 pt-6 border-t border-brand-600/60 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex flex-col items-center sm:items-start gap-0.5">
             <p className="text-brand-50 text-sm">{t.footer.copyright(branding.brandName)}</p>
-            <p className="text-brand-200 text-xs whitespace-nowrap">
+            <p className="text-brand-200 text-xs leading-snug">
               {locale === 'en' ? 'Developed by ' : 'Dikembangkan oleh '}
               <a
                 href={DEVELOPER.url}
@@ -231,9 +231,9 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
     </footer>
 
     {!fullOnMobile && (
-      <div className="block md:hidden bg-brand-800 border-t border-brand-700/50 px-4 py-3 text-center">
+      <div className="footer-strip block md:hidden bg-brand-800 border-t border-brand-700/50 px-4 pt-3 pb-[calc(5rem+env(safe-area-inset-bottom))] text-center">
         <p className="text-brand-50 text-xs mb-1">{t.footer.copyright(branding.brandName)}</p>
-        <p className="text-[10px] mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
+        <p className="text-[11px] leading-snug mt-0.5">
           <span className="text-brand-200">{locale === 'en' ? 'Developed by ' : 'Dikembangkan oleh '}</span>
           <a
             href={DEVELOPER.url}
@@ -243,7 +243,7 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
           >
             {DEVELOPER.name}
           </a>
-          <span className="text-brand-200">{locale === 'en' ? ` · supported by ${DEVELOPER.supportedBy}` : ` · didukung oleh ${DEVELOPER.supportedBy}`}</span>
+          <span className="block text-brand-200">{locale === 'en' ? `supported by ${DEVELOPER.supportedBy}` : `didukung oleh ${DEVELOPER.supportedBy}`}</span>
         </p>
       </div>
     )}

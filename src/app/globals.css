@@ -232,6 +232,9 @@ body {
   50%      { transform: translateY(-14px); }
 }
 
+/* Bilah pasang-iOS tampil di atas BottomNav: beri ruang tambahan di strip footer agar kredit tidak tertutup */
+.has-install-banner .footer-strip { padding-bottom: calc(9.25rem + env(safe-area-inset-bottom)); }
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

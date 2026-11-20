@@ -15,6 +15,7 @@ export default function IOSInstallBanner() {
   const [show, setShow] = useState(false);
   const [mode, setMode] = useState<BannerMode>('safari');
   const [copied, setCopied] = useState(false);
+  const [open, setOpen] = useState(false);
   const { t } = useLanguage();
   const branding = useLiveBranding();
 
@@ -33,6 +34,11 @@ export default function IOSInstallBanner() {
     setMode(isNotSafari ? 'other-browser' : 'safari');
     setTimeout(() => setShow(true), 2000);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('has-install-banner', show);
+    return () => document.documentElement.classList.remove('has-install-banner');
+  }, [show]);
 
   const dismiss = () => {
     setShow(false);
@@ -57,39 +63,49 @@ export default function IOSInstallBanner() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 120, opacity: 0 }}
           transition={{ type: 'spring', damping: 24, stiffness: 200 }}
-          className="fixed bottom-20 left-3 right-3 z-[70] rounded-2xl shadow-2xl overflow-hidden"
-          style={{ background: 'var(--ground)', border: '1.5px solid rgb(var(--brand-600) / 0.25)' }}
+          className="fixed left-3 right-3 z-[70] rounded-2xl shadow-xl overflow-hidden"
+          style={{
+            bottom: 'calc(4.75rem + env(safe-area-inset-bottom))',
+            background: 'var(--ground)',
+            border: '1.5px solid rgb(var(--brand-600) / 0.25)',
+          }}
+          role="region"
+          aria-label={t.pwa.title}
         >
-          <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, var(--accent), var(--accent-light))' }} />
-
-          <div className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="relative w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 border border-brand-200">
-                <Image src={branding.logoUrl} alt={branding.brandName} fill sizes="56px" className="object-cover" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-display font-bold text-brand-950 text-sm leading-tight">
-                  {t.pwa.title}
-                </p>
-                <p className="text-ink-muted text-xs mt-0.5 leading-snug">
-                  {t.pwa.desc(branding.brandName)}
-                </p>
-              </div>
-              <button
-                onClick={dismiss}
-                aria-label="Tutup"
-                className="p-1.5 rounded-lg text-brand-400 hover:text-brand-600 hover:bg-brand-100 transition-colors flex-shrink-0"
-              >
-                <X size={15} />
-              </button>
+          <div className="flex items-center gap-2.5 px-3 py-2">
+            <div className="relative w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 border border-brand-200">
+              <Image src={branding.logoUrl} alt="" fill sizes="40px" className="object-cover" />
             </div>
-
-            {mode === 'other-browser' ? (
-              <OtherBrowserGuide t={t} onCopy={copyLink} copied={copied} />
-            ) : (
-              <SafariGuide t={t} siteHost={hostOf(branding.siteUrl)} />
-            )}
+            <p className="flex-1 min-w-0 font-display font-bold text-brand-950 text-[13px] leading-tight truncate">
+              {t.pwa.title}
+            </p>
+            <button
+              onClick={() => setOpen(o => !o)}
+              aria-expanded={open}
+              aria-controls="ios-install-guide"
+              className="flex-shrink-0 h-9 px-3.5 rounded-lg text-xs font-bold text-white"
+              style={{ background: 'var(--accent)' }}
+            >
+              {open ? 'Tutup' : 'Cara'}
+            </button>
+            <button
+              onClick={dismiss}
+              aria-label="Tutup"
+              className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg text-ink-muted hover:text-brand-700 hover:bg-brand-100 transition-colors"
+            >
+              <X size={16} aria-hidden="true" />
+            </button>
           </div>
+
+          {open && (
+            <div id="ios-install-guide" className="px-4 pb-4 max-h-[55vh] overflow-y-auto">
+              {mode === 'other-browser' ? (
+                <OtherBrowserGuide t={t} onCopy={copyLink} copied={copied} />
+              ) : (
+                <SafariGuide t={t} siteHost={hostOf(branding.siteUrl)} />
+              )}
+            </div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>
