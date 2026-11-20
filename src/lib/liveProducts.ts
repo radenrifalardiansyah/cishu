@@ -41,7 +41,7 @@ export function rawFromDoc(id: string, data: Record<string, unknown>): FireProdu
     stock: (data.stock as string) ?? 'habis',
     stockQty: typeof data.stockQty === 'number' ? data.stockQty : undefined,
     gradient: (data.gradient as string) ?? 'from-rose-600 to-rose-400',
-    bgColor: (data.bgColor as string) ?? '#C93C55',
+    bgColor: (data.bgColor as string) ?? '#BD354C',
     weight: (data.weight as string) ?? '',
     order: typeof data.order === 'number' ? data.order : undefined,
     published: data.published as boolean | undefined,

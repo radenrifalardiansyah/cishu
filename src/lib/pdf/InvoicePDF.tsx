@@ -33,8 +33,8 @@ export interface InvoiceData {
 
 // ── Colour palette ────────────────────────────────────────────────────────────
 const C = {
-  primary:     '#C93C55',
-  primaryDark: '#B83A4B',
+  primary:     '#BD354C',
+  primaryDark: '#A32F3E',
   accent:      DEFAULT_THEME_COLOR,
   accentLight: '#FFEFED',
   accentMid:   '#FFD9D4',

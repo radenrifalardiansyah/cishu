@@ -68,7 +68,7 @@ export default function BottomNav() {
     <>
       <nav
         className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-brand-200"
-        style={{ background: 'var(--ground)', paddingBottom: 'env(safe-area-inset-bottom)', boxShadow: '0 -4px 20px rgba(184,58,75,0.12)' }}
+        style={{ background: 'var(--ground)', paddingBottom: 'env(safe-area-inset-bottom)', boxShadow: '0 -4px 20px rgba(163, 47, 62,0.12)' }}
       >
         <div>
           <div className="flex items-stretch">

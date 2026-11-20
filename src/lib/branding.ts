@@ -6,8 +6,8 @@
 // THEME_COLOR, THEME_BACKGROUND_COLOR).
 
 export const DEFAULT_BRAND_NAME = "Cishu Bite 'n Sip";
-export const DEFAULT_THEME_COLOR = '#C93C55';
-export const DEFAULT_THEME_BACKGROUND_COLOR = '#C93C55';
+export const DEFAULT_THEME_COLOR = '#BD354C';
+export const DEFAULT_THEME_BACKGROUND_COLOR = '#BD354C';
 
 // File statis di /public, dipakai hanya kalau admin belum upload logo.
 export const FALLBACK_LOGO_PATH = '/icon-512.png';
