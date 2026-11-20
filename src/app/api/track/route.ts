@@ -4,7 +4,7 @@ import { getCachedBranding } from '@/lib/server/branding';
 const PAGE_LABELS: Record<string, string> = {
   '/':          'Beranda',
   '/products':  'Menu Produk',
-  '/reseller':  'Reseller',
+  '/lapak':     'Lapak',
   '/panduan':   'Panduan',
   '/kontak':    'Kontak',
   '/checkout':  'Checkout',
@@ -16,15 +16,44 @@ function getPageLabel(path: string): string {
   return path;
 }
 
+// Pembatas frekuensi sederhana (in-memory per instance serverless — cukup untuk meredam spam WA,
+// bukan jaminan global): satu notifikasi per pengunjung per jam + batas total per jam.
+const WINDOW_MS = 60 * 60 * 1000;
+const MAX_PER_WINDOW = 30;
+const seen = new Map<string, number>();
+let windowStart = Date.now();
+let sentInWindow = 0;
+
+function allowNotify(key: string): boolean {
+  const now = Date.now();
+  if (now - windowStart > WINDOW_MS) { windowStart = now; sentInWindow = 0; }
+  for (const [k, t] of seen) if (now - t > WINDOW_MS) seen.delete(k);
+  if (seen.has(key) || sentInWindow >= MAX_PER_WINDOW) return false;
+  seen.set(key, now);
+  sentInWindow++;
+  return true;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { device, page, browser, ref } = await req.json();
+    const body = await req.json() as Record<string, unknown>;
+    // Endpoint publik yang memicu pesan WhatsApp: paksa string pendek (tanpa kontrol karakter)
+    // supaya isi pesan tidak bisa disusupi/dibengkakkan oleh pemanggil.
+    const clean = (v: unknown, max: number) => (typeof v === 'string' ? v : '').replace(/[\r\n\t]+/g, ' ').slice(0, max);
+    const device = clean(body.device, 40), page = clean(body.page, 200);
+    const browser = clean(body.browser, 60), ref = clean(body.ref, 200);
+
+    // Kunci pengunjung: sessionId bila dikirim klien, selain itu IP + user-agent.
+    const sid = clean(body.sessionId, 64);
+    const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim();
+    const key = sid || `${ip}|${req.headers.get('user-agent') ?? ''}`.slice(0, 200);
+    if (!allowNotify(key)) return NextResponse.json({ ok: true, skipped: 'rate_limited' });
 
     const branding = await getCachedBranding();
     const apiKey = process.env.CALLMEBOT_API_KEY;
-    const phone  = process.env.NOTIFY_PHONE ?? branding.whatsappNumber;
+    const phone  = process.env.NOTIFY_PHONE || branding.whatsappNumber;
 
-    if (!apiKey) return NextResponse.json({ ok: false, reason: 'no_key' });
+    if (!apiKey || !phone) return NextResponse.json({ ok: false, reason: 'no_key' });
 
     const now = new Date().toLocaleString('id-ID', {
       timeZone: 'Asia/Jakarta',
@@ -46,9 +75,9 @@ export async function POST(req: NextRequest) {
       refLine +
       `\n${now} WIB`;
 
-    const url = `https://api.callmebot.com/whatsapp.php?phone=${phone}&text=${encodeURIComponent(text)}&apikey=${apiKey}`;
+    const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(text)}&apikey=${encodeURIComponent(apiKey)}`;
 
-    await fetch(url, { cache: 'no-store' });
+    await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(8000) });
 
     return NextResponse.json({ ok: true });
   } catch {

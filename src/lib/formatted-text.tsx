@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 // ~~coret~~, dan baris berawalan "- " sebagai bullet list. Disimpan sebagai teks biasa (bukan
 // HTML) supaya tidak perlu sanitasi apa pun terhadap XSS: parser ini cuma menyusun elemen React
 // dari potongan teks (tetap di-escape otomatis oleh React seperti children biasa), tidak pernah
-// lewat dangerouslySetInnerHTML. Deskripsi diedit dari admin panel (karyaputra-admin, lihat
+// lewat dangerouslySetInnerHTML. Deskripsi diedit dari admin panel (cishu-admin, lihat
 // ProductsTab.tsx) yang punya toolbar Bold/Italic/Coret/List membungkus teks terpilih dengan
 // simbol yang sama — file ini adalah salinan renderer-nya untuk sisi storefront (read-only).
 

@@ -21,23 +21,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid_rating' }, { status: 400 });
   }
 
-  // `orders` pindah ke Postgres (Tahap 12 migrasi Fase 2 — lihat plan gleaming-wondering-quokka.md).
-  const sql = getSql();
-  const [{ exists }] = await sql<{ exists: boolean }[]>`select exists(select 1 from orders where customer_id = ${session.id} and status = 'selesai')`;
-  if (!exists) {
-    return NextResponse.json({ error: 'not_eligible' }, { status: 403 });
+  try {
+    // `orders` pindah ke Postgres (Tahap 12 migrasi Fase 2 — lihat plan gleaming-wondering-quokka.md).
+    const sql = getSql();
+    const [{ exists }] = await sql<{ exists: boolean }[]>`select exists(select 1 from orders where customer_id = ${session.id} and status = 'selesai')`;
+    if (!exists) {
+      return NextResponse.json({ error: 'not_eligible' }, { status: 403 });
+    }
+
+    // Satu review per customer (id baris = customer id) — kirim ulang menimpa total (rating/comment/
+    // approved/created_at semuanya, bukan cuma field yang berubah), sama seperti `.set({merge:true})`
+    // versi Firestore lama yang mengirim SEMUA field tiap kali termasuk createdAt baru.
+    await sql`
+      insert into reviews (id, customer_id, customer_name, rating, comment, approved, created_at, updated_at)
+      values (${session.id}, ${session.id}, ${session.name}, ${rating}, ${comment}, false, now(), now())
+      on conflict (id) do update set
+        customer_id = excluded.customer_id, customer_name = excluded.customer_name, rating = excluded.rating,
+        comment = excluded.comment, approved = excluded.approved, created_at = excluded.created_at, updated_at = excluded.updated_at
+    `;
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error('[api/reviews]', err);
+    return NextResponse.json({ error: 'server_error' }, { status: 500 });
   }
-
-  // Satu review per customer (id baris = customer id) — kirim ulang menimpa total (rating/comment/
-  // approved/created_at semuanya, bukan cuma field yang berubah), sama seperti `.set({merge:true})`
-  // versi Firestore lama yang mengirim SEMUA field tiap kali termasuk createdAt baru.
-  await sql`
-    insert into reviews (id, customer_id, customer_name, rating, comment, approved, created_at, updated_at)
-    values (${session.id}, ${session.id}, ${session.name}, ${rating}, ${comment}, false, now(), now())
-    on conflict (id) do update set
-      customer_id = excluded.customer_id, customer_name = excluded.customer_name, rating = excluded.rating,
-      comment = excluded.comment, approved = excluded.approved, created_at = excluded.created_at, updated_at = excluded.updated_at
-  `;
-
-  return NextResponse.json({ ok: true });
 }

@@ -12,7 +12,7 @@ function wibDateKey(d: Date = new Date()): string {
 export const PAGE_KEYS: Record<string, string> = {
   home:      '/',
   products:  '/products',
-  reseller:  '/reseller',
+  lapak:     '/lapak',
   panduan:   '/panduan',
   kontak:    '/kontak',
   checkout:  '/checkout',
@@ -21,7 +21,7 @@ export const PAGE_KEYS: Record<string, string> = {
 export const PAGE_LABELS: Record<string, string> = {
   home:      'Beranda',
   products:  'Menu Produk',
-  reseller:  'Reseller',
+  lapak:     'Lapak',
   panduan:   'Panduan',
   kontak:    'Kontak',
   checkout:  'Checkout',

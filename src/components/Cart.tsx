@@ -8,7 +8,6 @@ import { X, ShoppingCart, Plus, Minus, Trash2, ArrowRight, ShoppingBag } from 'l
 import { useCartStore } from '@/lib/store';
 import { formatCurrency } from '@/lib/whatsapp';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getProductLocale } from '@/lib/product-translations';
 import { useDialogA11y } from '@/lib/useDialogA11y';
 
 export default function Cart() {
@@ -16,7 +15,7 @@ export default function Cart() {
     useCartStore();
   const totalItems = getTotalItems();
   const totalPrice = getTotalPrice();
-  const { t, locale } = useLanguage();
+  const { t } = useLanguage();
 
   useEffect(() => {
     useCartStore.persist.rehydrate();
@@ -37,7 +36,7 @@ export default function Cart() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeCart}
-            className="fixed inset-0 z-[60] bg-amber-950/25 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] bg-brand-950/25 backdrop-blur-sm"
           />
 
           <motion.aside
@@ -50,19 +49,19 @@ export default function Cart() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-            className="fixed right-0 top-0 bottom-0 z-[60] w-full max-w-sm sm:max-w-md flex flex-col shadow-2xl shadow-amber-200 cart-surface"
+            className="fixed right-0 top-0 bottom-0 z-[60] w-full max-w-sm sm:max-w-md flex flex-col shadow-2xl shadow-brand-200 cart-surface"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-amber-100">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-brand-100">
               <div className="flex items-center gap-2">
-                <ShoppingCart size={19} className="text-amber-600" />
-                <h2 id="cart-title" className="font-display text-lg font-bold text-amber-950">{t.cart.title}</h2>
+                <ShoppingCart size={19} className="text-brand-600" />
+                <h2 id="cart-title" className="font-display text-lg font-bold text-brand-950">{t.cart.title}</h2>
                 {totalItems > 0 && (
                   <motion.span
                     key={totalItems}
                     initial={{ scale: 0.5 }}
                     animate={{ scale: 1 }}
-                    className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-white"
+                    className="px-2 py-0.5 rounded-full text-xs font-bold bg-brand-500 text-white"
                   >
                     {totalItems}
                   </motion.span>
@@ -72,7 +71,7 @@ export default function Cart() {
                 ref={closeBtnRef}
                 onClick={closeCart}
                 aria-label="Tutup keranjang"
-                className="p-2 rounded-xl hover:bg-amber-100 text-amber-600/70 hover:text-amber-700 transition-colors"
+                className="p-2 rounded-xl hover:bg-brand-100 text-ink-muted hover:text-brand-700 transition-colors"
               >
                 <X size={17} aria-hidden="true" />
               </button>
@@ -88,20 +87,19 @@ export default function Cart() {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-col items-center justify-center h-64 text-center"
                   >
-                    <div className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mb-3" aria-hidden="true">
-                      <ShoppingCart size={34} className="text-amber-600" />
+                    <div className="w-20 h-20 rounded-full bg-brand-100 flex items-center justify-center mb-3" aria-hidden="true">
+                      <ShoppingCart size={34} className="text-brand-600" />
                     </div>
-                    <p className="font-display text-lg font-semibold text-amber-800/60 mb-1">
+                    <p className="font-display text-lg font-semibold text-ink-muted mb-1">
                       {t.cart.empty}
                     </p>
-                    <p className="text-amber-700/40 text-sm mb-4">{t.cart.emptyDesc}</p>
+                    <p className="text-ink-muted text-sm mb-4">{t.cart.emptyDesc}</p>
                     <Link href="/products" onClick={closeCart} className="btn-primary px-5 py-2.5 text-sm font-bold inline-flex items-center gap-2">
                       {t.cart.seeMenu} <ArrowRight size={13} aria-hidden="true" />
                     </Link>
                   </motion.div>
                 ) : (
                   items.map(item => {
-                    const lp = getProductLocale(item.product.id, locale, item.product);
                     return (
                     <motion.div
                       key={item.product.id}
@@ -110,14 +108,14 @@ export default function Cart() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20, height: 0 }}
                       transition={{ type: 'spring', damping: 22 }}
-                      className="bg-white rounded-2xl p-3.5 border border-amber-100 hover:border-amber-200 transition-colors shadow-sm"
+                      className="bg-white rounded-2xl p-3.5 border border-brand-100 hover:border-brand-200 transition-colors shadow-sm"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 border border-amber-100">
+                        <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 border border-brand-100">
                           {item.product.images?.[0] ? (
                             <Image
                               src={item.product.images[0]}
-                              alt={lp.name}
+                              alt={item.product.name}
                               width={48}
                               height={48}
                               className="w-full h-full object-cover"
@@ -133,26 +131,26 @@ export default function Cart() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-1">
-                            <p className="font-display text-sm font-semibold text-amber-950 leading-tight line-clamp-2">
-                              {lp.name}
+                            <p className="font-display text-sm font-semibold text-brand-950 leading-tight line-clamp-2">
+                              {item.product.name}
                             </p>
                             <button
                               onClick={() => removeItem(item.product.id)}
-                              aria-label={`Hapus ${lp.name} dari keranjang`}
+                              aria-label={`Hapus ${item.product.name} dari keranjang`}
                               className="relative before:absolute before:-inset-3 before:content-[''] p-1 rounded-lg text-red-400/60 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
                             >
                               <Trash2 size={13} aria-hidden="true" />
                             </button>
                           </div>
-                          <p className="text-amber-600 text-sm font-bold mt-0.5">
+                          <p className="text-brand-600 text-sm font-bold mt-0.5">
                             {formatCurrency(item.product.price * item.quantity)}
                           </p>
                           <div className="flex items-center gap-2 mt-2">
                             <motion.button
                               whileTap={{ scale: 0.85 }}
                               onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                              aria-label={`Kurangi jumlah ${lp.name}`}
-                              className="relative before:absolute before:-inset-2 before:content-[''] w-7 h-7 rounded-lg flex items-center justify-center bg-amber-100 hover:bg-amber-200 text-amber-700 border border-amber-200 transition-colors"
+                              aria-label={`Kurangi jumlah ${item.product.name}`}
+                              className="relative before:absolute before:-inset-2 before:content-[''] w-7 h-7 rounded-lg flex items-center justify-center bg-brand-100 hover:bg-brand-200 text-brand-700 border border-brand-200 transition-colors"
                             >
                               <Minus size={11} aria-hidden="true" />
                             </motion.button>
@@ -160,19 +158,19 @@ export default function Cart() {
                               key={item.quantity}
                               initial={{ scale: 0.7 }}
                               animate={{ scale: 1 }}
-                              className="min-w-[24px] text-center text-amber-950 text-sm font-bold"
+                              className="min-w-[24px] text-center text-brand-950 text-sm font-bold"
                             >
                               {item.quantity}
                             </motion.span>
                             <motion.button
                               whileTap={{ scale: 0.85 }}
                               onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                              aria-label={`Tambah jumlah ${lp.name}`}
-                              className="relative before:absolute before:-inset-2 before:content-[''] w-7 h-7 rounded-lg flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-white border border-amber-500 transition-colors"
+                              aria-label={`Tambah jumlah ${item.product.name}`}
+                              className="relative before:absolute before:-inset-2 before:content-[''] w-7 h-7 rounded-lg flex items-center justify-center bg-brand-600 hover:bg-brand-700 text-white border border-brand-600 transition-colors"
                             >
                               <Plus size={11} aria-hidden="true" />
                             </motion.button>
-                            <span className="text-amber-600/40 text-xs ml-1">
+                            <span className="text-ink-muted text-xs ml-1">
                               × {formatCurrency(item.product.price)}
                             </span>
                           </div>
@@ -191,15 +189,15 @@ export default function Cart() {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="px-4 py-4 border-t border-amber-100 space-y-3"
+                  className="px-4 py-4 border-t border-brand-100 space-y-3"
                 >
-                  <div className="bg-amber-50 rounded-xl p-3.5 border border-amber-100">
-                    <div className="flex justify-between text-sm text-amber-700/60 mb-1.5">
+                  <div className="bg-brand-50 rounded-xl p-3.5 border border-brand-100">
+                    <div className="flex justify-between text-sm text-ink-muted mb-1.5">
                       <span>{totalItems} {t.cart.item}</span>
                       <span>{t.cart.subtotal}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-amber-800/70 text-sm">{t.cart.total}</span>
+                      <span className="text-ink-muted text-sm">{t.cart.total}</span>
                       <motion.span
                         key={totalPrice}
                         initial={{ scale: 0.9 }}

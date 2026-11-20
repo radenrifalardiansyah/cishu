@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { timingSafeEqual } from 'crypto';
 
-// Called by the (separate) admin app right after it writes to Firestore, so the
-// storefront's 5-min product/category cache doesn't have to expire on its own —
-// admin edits show up on the next request instead of up to 5 min later.
-const VALID_TAGS = ['products', 'categories', 'stats', 'payment-info', 'branding'] as const;
+// Dipanggil cishu-admin (lib/revalidate.ts) tepat setelah menulis ke database, supaya cache
+// produk/kategori/branding/statistik storefront tidak menunggu TTL-nya habis.
+// Autentikasi: header `Authorization: Bearer <REVALIDATE_SECRET>` (env sama di kedua project).
+const VALID_TAGS = ['products', 'categories', 'stats', 'payment-info', 'branding', 'lapak'] as const;
 type ValidTag = typeof VALID_TAGS[number];
 
 function isAuthed(req: NextRequest) {
   const secret = process.env.REVALIDATE_SECRET ?? '';
   if (!secret) return false;
-  return req.headers.get('authorization') === `Bearer ${secret}`;
+  const given = Buffer.from(req.headers.get('authorization') ?? '');
+  const expected = Buffer.from(`Bearer ${secret}`);
+  return given.length === expected.length && timingSafeEqual(given, expected);
 }
 
 export async function POST(req: NextRequest) {
@@ -29,12 +32,17 @@ export async function POST(req: NextRequest) {
   // a bare tag with no profile now only logs a deprecation warning in this Next version.
   tags.forEach(tag => revalidateTag(tag, { expire: 0 }));
 
-  // The homepage and product-detail pages read Postgres directly under a 5-min
-  // ISR window (not via unstable_cache), so they need revalidatePath too.
+  // Beranda dan halaman produk membaca Postgres langsung di bawah jendela ISR (bukan lewat
+  // unstable_cache), jadi perlu revalidatePath juga.
   if (tags.includes('products')) {
     revalidatePath('/');
     revalidatePath('/products');
     revalidatePath('/products/[id]', 'page');
+  }
+  // Branding dipakai metadata/JSON-LD/manifest di hampir semua halaman (nama, logo, warna tema):
+  // tanpa ini halaman ISR tetap menyajikan brand lama sampai jendelanya habis.
+  if (tags.includes('branding')) {
+    revalidatePath('/', 'layout');
   }
 
   return NextResponse.json({ revalidated: true, tags });

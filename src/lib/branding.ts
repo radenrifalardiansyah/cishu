@@ -1,12 +1,15 @@
-// Semua identitas toko (nama, logo, kontak, alamat, SEO, dst.) diedit dari admin panel
-// (cemilantehrisma-admin > Settings) dan dibaca lewat getCachedBranding() (server) /
-// useLiveBranding() (client). File ini sengaja TIDAK berisi data toko apa pun — hanya
-// bentuk datanya, fallback netral kalau database tidak bisa dijangkau, dan helper format.
+// Identitas toko (nama, logo, kontak, alamat, SEO, dst.) diedit dari admin panel
+// (cishu-admin > Settings) dan dibaca lewat getCachedBranding() (server) /
+// useLiveBranding() (client). File ini hanya berisi bentuk datanya, fallback bawaan
+// kalau database tidak bisa dijangkau / field belum diisi di admin, dan helper format.
+// Fallback nama & palet harus sama dengan cishu-admin/src/lib/branding.ts (BRAND_NAME,
+// THEME_COLOR, THEME_BACKGROUND_COLOR).
 
-export const DEFAULT_THEME_COLOR = '#D97706';
-export const DEFAULT_THEME_BACKGROUND_COLOR = '#FFFBF5';
+export const DEFAULT_BRAND_NAME = "Cishu Bite 'n Sip";
+export const DEFAULT_THEME_COLOR = '#C93C55';
+export const DEFAULT_THEME_BACKGROUND_COLOR = '#C93C55';
 
-// File statis netral di /public, dipakai hanya kalau admin belum upload logo.
+// File statis di /public, dipakai hanya kalau admin belum upload logo.
 export const FALLBACK_LOGO_PATH = '/icon-512.png';
 
 // Kredit pengembang website (vendor), bukan identitas toko — sama di semua deployment.
@@ -47,13 +50,13 @@ export interface LiveBranding {
 }
 
 // URL situs kalau admin belum mengisi "URL Website": env eksplisit, lalu domain produksi
-// yang otomatis di-set Vercel, lalu localhost untuk dev.
+// yang otomatis di-set Vercel, lalu domain produksi bawaan (localhost untuk dev).
 export function envSiteUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL;
   if (explicit) return explicit.replace(/\/+$/, '');
   const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
   if (vercel) return `https://${vercel}`;
-  return 'http://localhost:3000';
+  return process.env.NODE_ENV === 'production' ? 'https://cishu.vercel.app' : 'http://localhost:3000';
 }
 
 // "0812-1213-2014" / "+62 812..." / "62812..." -> "6281212132014" (format wa.me).
@@ -99,10 +102,10 @@ export function hostOf(url: string): string {
   return url.replace(/^https?:\/\//, '').replace(/\/+$/, '');
 }
 
-// Fallback netral saat database tidak bisa dijangkau atau field belum diisi di admin.
+// Fallback bawaan saat database tidak bisa dijangkau atau field belum diisi di admin.
 export function defaultLiveBranding(): LiveBranding {
   return {
-    brandName: 'Toko Online',
+    brandName: DEFAULT_BRAND_NAME,
     legalName: '',
     tagline: '',
     description: '',

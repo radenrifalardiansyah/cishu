@@ -1,8 +1,7 @@
 import { parseJsonb } from '@/lib/db';
 
-// Baris Postgres `products` (Supabase, sama dengan karyaputra-admin) -> shape yang sama
-// persis dengan dokumen Firestore lama yang diharapkan `rawFromDoc` di lib/liveProducts.ts —
-// supaya seluruh logic overlay/merge di sana tidak perlu berubah sama sekali.
+// Baris Postgres `products` (Supabase, sama dengan cishu-admin) -> shape yang diharapkan
+// `rawFromDoc` di lib/liveProducts.ts.
 export interface ProductRow {
   id: string; name: string | null; description: string | null; details: unknown;
   category: string | null; price: string | null; original_price: string | null;
@@ -24,8 +23,8 @@ export function rowToProductData(row: ProductRow): Record<string, unknown> {
     badge: row.badge ?? undefined,
     stock: row.stock,
     stockQty: Number(row.stock_qty) || 0,
-    gradient: row.gradient ?? 'from-amber-700 to-yellow-500',
-    bgColor: row.bg_color ?? '#B45309',
+    gradient: row.gradient ?? 'from-rose-600 to-rose-400',
+    bgColor: row.bg_color ?? '#C93C55',
     weight: row.weight ?? '',
     order: row.sort_order ?? undefined,
     published: row.published,

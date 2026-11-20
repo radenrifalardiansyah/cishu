@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Playfair_Display, Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 import { Toaster } from 'react-hot-toast';
 import SplashScreen from '@/components/SplashScreen';
 import IOSInstallBanner from '@/components/IOSInstallBanner';
@@ -15,15 +15,16 @@ import { BrandingProvider } from '@/lib/useLiveBranding';
 import MotionProvider from '@/components/MotionProvider';
 import './globals.css';
 
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
-  display: 'swap',
-});
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
+// Font di-host sendiri (sama dengan panel admin) supaya build tidak bergantung pada Google Fonts.
+const jakarta = localFont({
+  src: [
+    { path: './fonts/plus-jakarta-sans-latin-400-normal.woff2', weight: '400', style: 'normal' },
+    { path: './fonts/plus-jakarta-sans-latin-500-normal.woff2', weight: '500', style: 'normal' },
+    { path: './fonts/plus-jakarta-sans-latin-600-normal.woff2', weight: '600', style: 'normal' },
+    { path: './fonts/plus-jakarta-sans-latin-700-normal.woff2', weight: '700', style: 'normal' },
+    { path: './fonts/plus-jakarta-sans-latin-800-normal.woff2', weight: '800', style: 'normal' },
+  ],
+  variable: '--font-jakarta',
   display: 'swap',
 });
 
@@ -95,7 +96,7 @@ export async function generateViewport(): Promise<Viewport> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const branding = await getCachedBranding();
   return (
-    <html lang="id" className={`${playfair.variable} ${inter.variable}`}>
+    <html lang="id" className={jakarta.variable}>
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -119,18 +120,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             duration: 2500,
             style: {
               background: 'var(--text-primary)',
-              color: 'var(--bg-primary)',
+              color: 'var(--ground)',
               border: '1px solid var(--border)',
               backdropFilter: 'blur(16px)',
               borderRadius: '12px',
               fontSize: '14px',
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'var(--font-jakarta), system-ui, sans-serif',
             },
             success: {
               iconTheme: { primary: 'var(--accent)', secondary: 'var(--text-primary)' },
             },
             error: {
-              iconTheme: { primary: '#EF4444', secondary: 'var(--text-primary)' },
+              iconTheme: { primary: '#F87171', secondary: 'var(--text-primary)' },
             },
           }}
         />

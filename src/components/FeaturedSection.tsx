@@ -9,8 +9,11 @@ import ProductCard from './ProductCard';
 
 export default function FeaturedSection() {
   const products = useLiveProducts();
-  const featured = products.filter(p => p.badge === 'Best Seller' || p.badge === 'Popular').slice(0, 6);
+  const badged = products.filter(p => p.badge === 'Best Seller' || p.badge === 'Popular');
+  const featured = (badged.length ? badged : products).slice(0, 6);
   const { t } = useLanguage();
+
+  if (featured.length === 0) return null;
 
   return (
     <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -23,16 +26,16 @@ export default function FeaturedSection() {
       >
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Flame size={16} className="text-amber-500" />
-            <p className="text-amber-600/70 text-sm font-semibold tracking-widest uppercase">
+            <Flame size={16} className="text-brand-600" />
+            <p className="text-ink-muted text-sm font-semibold tracking-widest uppercase">
               {t.featured.badge}
             </p>
           </div>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold">
-            <span className="text-amber-950">{t.featured.title1} </span>
+            <span className="text-brand-950">{t.featured.title1} </span>
             <span className="gradient-text">{t.featured.title2}</span>
           </h2>
-          <p className="text-amber-800/55 text-sm sm:text-base mt-1.5 max-w-md">
+          <p className="text-ink-muted text-sm sm:text-base mt-1.5 max-w-md">
             {t.featured.subtitle}
           </p>
         </div>

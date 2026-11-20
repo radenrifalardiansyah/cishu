@@ -14,11 +14,11 @@ function FormSkeleton() {
   return (
     <main className="min-h-screen" aria-busy="true">
       <div className="max-w-md mx-auto px-4 pt-28 sm:pt-32 pb-20 animate-pulse">
-        <div className="h-9 w-40 rounded-lg bg-amber-100 mb-3" />
-        <div className="h-4 w-64 max-w-full rounded bg-amber-100 mb-8" />
-        <div className="bg-white rounded-2xl border border-amber-100 p-6 space-y-4 shadow-sm">
-          <div className="h-12 rounded-xl bg-amber-50" />
-          <div className="h-12 rounded-xl bg-amber-200/60" />
+        <div className="h-9 w-40 rounded-lg bg-brand-100 mb-3" />
+        <div className="h-4 w-64 max-w-full rounded bg-brand-100 mb-8" />
+        <div className="bg-white rounded-2xl border border-brand-100 p-6 space-y-4 shadow-sm">
+          <div className="h-12 rounded-xl bg-brand-50" />
+          <div className="h-12 rounded-xl bg-brand-200/60" />
         </div>
       </div>
     </main>
@@ -84,12 +84,12 @@ function CompleteProfileForm() {
     <main className="min-h-screen">
       <Navbar />
       <div className="max-w-md mx-auto px-4 pt-28 sm:pt-32 pb-20">
-        <h1 className="font-display text-3xl sm:text-4xl font-bold text-amber-950 mb-1">Satu Langkah Lagi</h1>
-        <p className="text-amber-800/55 text-sm mb-8">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-950 mb-1">Satu Langkah Lagi</h1>
+        <p className="text-ink-muted text-sm mb-8">
           {name ? `Halo, ${name}! ` : ''}Kami perlu nomor HP Anda untuk konfirmasi pesanan.
         </p>
 
-        <form onSubmit={submit} noValidate className="bg-white rounded-2xl border border-amber-100 p-6 space-y-4 shadow-sm">
+        <form onSubmit={submit} noValidate className="bg-white rounded-2xl border border-brand-100 p-6 space-y-4 shadow-sm">
           <Field
             ref={phoneRef} label="No. HP" icon={Phone} type="tel" value={phone}
             onChange={e => { setPhone(e.target.value); setPhoneError(''); }}

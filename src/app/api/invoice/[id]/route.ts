@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import React from 'react';
 import { renderToBuffer } from '@react-pdf/renderer';
 import InvoicePDF, { type InvoiceData } from '@/lib/pdf/InvoicePDF';
-import { HALAL_DATA_URI } from '@/lib/invoice-assets';
 import { pdfLogoSrc } from '@/lib/server/pdfLogo';
 import { getInvoice, invoiceTokenOk } from '@/lib/services/invoiceService';
 import { getCachedBranding } from '@/lib/server/branding';
@@ -36,7 +35,7 @@ export async function GET(
     }
 
     const printedAt = new Date().toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    const data: InvoiceData = { ...saved, printedAt, logo: await pdfLogoSrc(branding), halalLogo: HALAL_DATA_URI, bank };
+    const data: InvoiceData = { ...saved, printedAt, logo: await pdfLogoSrc(branding), bank };
 
     const buffer = await renderToBuffer(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

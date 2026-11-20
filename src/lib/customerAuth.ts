@@ -18,6 +18,7 @@ export interface CustomerSession {
 // supaya "0812..." dan "+62812..." dianggap akun yang sama.
 export function normalizePhone(raw: string): string {
   const digits = raw.replace(/\D/g, '');
+  if (!digits) return '';
   if (digits.startsWith('0')) return `62${digits.slice(1)}`;
   if (digits.startsWith('62')) return digits;
   return `62${digits}`;
@@ -37,8 +38,16 @@ export function verifyPassword(password: string, stored: string): boolean {
   return candidate.length === expected.length && timingSafeEqual(candidate, expected);
 }
 
+// Fail-closed: tanpa SESSION_SECRET kunci HMAC kosong, sehingga siapa pun bisa memalsukan cookie
+// sesi pelanggan mana pun. Lebih baik semua login/sesi gagal daripada diam-diam tidak aman.
+function sessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.length < 16) throw new Error('SESSION_SECRET belum di-set (minimal 16 karakter)');
+  return secret;
+}
+
 function sign(value: string): string {
-  return createHmac('sha256', process.env.SESSION_SECRET ?? '').update(value).digest('hex');
+  return createHmac('sha256', sessionSecret()).update(value).digest('hex');
 }
 
 export function createSessionCookieValue(customerId: string): string {
@@ -51,7 +60,13 @@ function verifySessionCookieValue(cookieValue: string | undefined): string | nul
   if (dot < 0) return null;
   const id = cookieValue.slice(0, dot);
   const sig = Buffer.from(cookieValue.slice(dot + 1));
-  const expected = Buffer.from(sign(id));
+  let expected: Buffer;
+  try {
+    expected = Buffer.from(sign(id));
+  } catch (err) {
+    console.error('[customerAuth]', err);
+    return null;
+  }
   if (sig.length !== expected.length || !timingSafeEqual(sig, expected)) return null;
   return id;
 }
@@ -98,7 +113,13 @@ export function verifyPendingGoogleCookieValue(cookieValue: string | undefined):
   if (dot < 0) return null;
   const encoded = cookieValue.slice(0, dot);
   const sig = Buffer.from(cookieValue.slice(dot + 1));
-  const expected = Buffer.from(sign(encoded));
+  let expected: Buffer;
+  try {
+    expected = Buffer.from(sign(encoded));
+  } catch (err) {
+    console.error('[customerAuth]', err);
+    return null;
+  }
   if (sig.length !== expected.length || !timingSafeEqual(sig, expected)) return null;
 
   try {

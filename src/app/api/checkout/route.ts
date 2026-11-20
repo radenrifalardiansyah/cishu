@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { randomUUID } from 'crypto';
 import { getSql } from '@/lib/db';
 import { notify } from '@/lib/notifications';
 import { getSessionCustomer } from '@/lib/customerAuth';
-import { getMergedProduct } from '@/lib/server/getProduct';
-import { products as staticProducts } from '@/lib/products';
+import { fireToProduct, isPublished, rawFromDoc } from '@/lib/liveProducts';
+import { PRODUCT_SELECT_COLUMNS, rowToProductData, type ProductRow } from '@/lib/server/productRow';
+import type { Product } from '@/types';
 import { computeVoucherDiscount, normalizeVoucherCode, voucherDiscountLabel } from '@/lib/voucher';
 import { voucherProblem, voucherRule, customerVoucherUses, type VoucherRow } from '@/lib/server/vouchers';
 
@@ -31,8 +32,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
     }
 
-    const body = await req.json() as Partial<CheckoutBody>;
-    const customerName  = (body.customerName ?? '').toString().trim();
+    const body = await req.json().catch(() => ({})) as Partial<CheckoutBody>;
+    const customerName  = (body.customerName ?? '').toString().trim().slice(0, 100);
     // Nomor HP selalu dari akun yang login, bukan dari input client — supaya
     // pesanan tidak bisa dipalsukan mengatasnamakan nomor orang lain.
     const customerPhone = session.phone;
@@ -41,42 +42,67 @@ export async function POST(req: NextRequest) {
     if (!customerName || items.length === 0 || items.length > MAX_ITEMS) {
       return NextResponse.json({ error: 'Data pesanan tidak lengkap.' }, { status: 400 });
     }
+    if (body.deliveryMethod === 'delivery' && !(body.address ?? '').toString().trim()) {
+      return NextResponse.json({ error: 'Alamat wajib diisi untuk pengiriman.' }, { status: 400 });
+    }
 
-    // Cek stok live (langsung ke Postgres, bukan lewat cache /api/products) sebelum
-    // pesanan disimpan — mencegah order untuk item yang admin sudah tandai habis.
-    // Harga SELALU dari katalog live (bukan dari browser) — harga/subtotal/total kiriman klien
-    // tidak dipercaya, supaya pesanan tidak bisa dibuat dengan harga yang diubah-ubah.
-    const livePrice = new Map<string, number>();
-    const stockIssues: { name: string; reason: 'habis' | 'insufficient' | 'unknown'; available?: number }[] = [];
+    // Cek stok live (langsung ke Postgres, bukan lewat cache /api/products) sebelum pesanan disimpan
+    // — mencegah order untuk item yang admin sudah tandai habis. Harga SELALU dari katalog live,
+    // tidak pernah dari browser: tiap item wajib punya productId yang dikenal (item tanpa productId
+    // dulu lolos dengan harga kiriman klien, sehingga harga bisa diubah-ubah).
+    // Qty per produk dijumlahkan dulu supaya baris ganda produk yang sama tidak lolos cek stok.
+    const requested = new Map<string, { qty: number; name: string }>();
     for (const it of items) {
-      const productId = (it.productId ?? '').toString().trim();
-      if (!productId) continue;
-      const qty = Math.max(1, Math.floor(Number(it.qty)) || 1);
-      const live = await getMergedProduct(productId, staticProducts);
+      const productId = (it?.productId ?? '').toString().trim();
+      if (!productId) {
+        return NextResponse.json({ error: 'Data pesanan tidak lengkap.' }, { status: 400 });
+      }
+      const qty = Math.min(9999, Math.max(1, Math.floor(Number(it.qty)) || 1));
+      const prev = requested.get(productId);
+      requested.set(productId, { qty: (prev?.qty ?? 0) + qty, name: prev?.name ?? (it.name ?? '').toString() });
+    }
+
+    const liveById = new Map<string, Product>();
+    try {
+      const sql = getSql();
+      const rows = await sql<ProductRow[]>`
+        select ${sql.unsafe(PRODUCT_SELECT_COLUMNS)} from products where id in ${sql([...requested.keys()])}
+      `;
+      for (const row of rows) {
+        const raw = rawFromDoc(row.id, rowToProductData(row));
+        if (isPublished(raw)) liveById.set(row.id, fireToProduct(raw));
+      }
+    } catch (err) {
+      console.error('[api/checkout] cek stok', err);
+      return NextResponse.json({ error: 'Gagal memeriksa stok. Coba lagi.' }, { status: 503 });
+    }
+
+    const stockIssues: { name: string; reason: 'habis' | 'insufficient' | 'unknown'; available?: number }[] = [];
+    for (const [productId, { qty, name }] of requested) {
+      const live = liveById.get(productId);
       if (!live) {
-        stockIssues.push({ name: it.name || productId, reason: 'unknown' });
+        stockIssues.push({ name: name || productId, reason: 'unknown' });
       } else if (live.stock === 'habis') {
         stockIssues.push({ name: live.name, reason: 'habis' });
       } else if (live.stock === 'ready' && typeof live.stockQty === 'number' && qty > live.stockQty) {
         stockIssues.push({ name: live.name, reason: 'insufficient', available: live.stockQty });
       }
-      if (live) livePrice.set(productId, Number(live.price) || 0);
     }
     if (stockIssues.length > 0) {
       return NextResponse.json({ error: 'stock_issue', items: stockIssues }, { status: 409 });
     }
 
     const cleanItems = items.slice(0, MAX_ITEMS).map(it => {
-      const productId = (it.productId ?? '').toString().trim();
-      const qty = Math.max(1, Math.floor(Number(it.qty)) || 1);
-      // Item tanpa productId (sesi lama) tidak punya harga katalog — hanya itu yang memakai harga klien.
-      const price = productId && livePrice.has(productId) ? livePrice.get(productId)! : Math.max(0, Number(it.price) || 0);
+      const productId = it.productId!.toString().trim();
+      const live = liveById.get(productId)!;
+      const qty = Math.min(9999, Math.max(1, Math.floor(Number(it.qty)) || 1));
+      const price = Number(live.price) || 0;
       return {
-        // productId dipakai admin untuk memotong stok gudang saat pesanan ditandai selesai —
-        // fallback ke pencarian by-name kalau kosong (mis. item dari sesi lama sebelum field ini ada).
+        // productId dipakai admin untuk memotong stok gudang saat pesanan ditandai selesai.
         productId,
-        name: (it.name ?? '').toString().slice(0, 200),
-        weight: (it.weight ?? '').toString().slice(0, 50),
+        // Nama & berat dari katalog (bukan klien) supaya invoice/pesanan konsisten dengan admin.
+        name: live.name.slice(0, 200),
+        weight: (live.weight ?? '').toString().slice(0, 50),
         qty, price, subtotal: price * qty,
       };
     });
@@ -85,11 +111,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Data pesanan tidak lengkap.' }, { status: 400 });
     }
 
+    // Nomor invoice & tanggal mengikuti hari kalender WIB (Asia/Jakarta), bukan zona server (UTC).
     const now   = new Date();
-    const pad   = (n: number) => n.toString().padStart(2, '0');
+    const wib   = Object.fromEntries(
+      new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+      }).formatToParts(now).map(p => [p.type, p.value]),
+    ) as Record<string, string>;
     const rand  = Math.floor(Math.random() * 900 + 100);
-    const invoiceNo = `WEB-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}-${rand}`;
-    const date  = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const invoiceNo = `WEB-${wib.year}${wib.month}${wib.day}-${wib.hour}${wib.minute}-${rand}`;
+    const date  = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
 
     const sql = getSql();
     const id = randomUUID();
@@ -133,18 +165,21 @@ export async function POST(req: NextRequest) {
       throw err;
     }
 
-    try {
-      await notify({
-        type: 'order_new',
-        title: 'Pesanan online baru',
-        message: `Pesanan ${invoiceNo} senilai Rp${orderTotal.toLocaleString('id-ID')} — oleh ${customerName} (Online).`,
-        link: 'orders',
-        entityCollection: 'orders', entityId: id,
-        actorUsername: customerName,
-      });
-    } catch (err) {
-      console.error('[api/checkout] Failed to write notification', err);
-    }
+    // Notifikasi admin tidak boleh menunda atau menggagalkan respons pesanan yang sudah tersimpan.
+    after(async () => {
+      try {
+        await notify({
+          type: 'order_new',
+          title: 'Pesanan online baru',
+          message: `Pesanan ${invoiceNo} senilai Rp${orderTotal.toLocaleString('id-ID')} — oleh ${customerName} (Online).`,
+          link: 'orders',
+          entityCollection: 'orders', entityId: id,
+          actorUsername: customerName,
+        });
+      } catch (err) {
+        console.error('[api/checkout] Failed to write notification', err);
+      }
+    });
 
     return NextResponse.json({ id, invoiceNo });
   } catch (err) {

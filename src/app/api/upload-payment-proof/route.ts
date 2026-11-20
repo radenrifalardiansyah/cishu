@@ -17,9 +17,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const form = await req.formData();
-  const file = form.get('file') as File | null;
-  if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 });
+  const form = await req.formData().catch(() => null);
+  const file = form?.get('file');
+  if (!(file instanceof File)) return NextResponse.json({ error: 'No file' }, { status: 400 });
+  // Hanya gambar (bukti transfer/QRIS) — jangan jadikan endpoint ini host file sembarang.
+  if (!/^image\/(jpeg|png|webp|heic|heif)$/i.test(file.type)) {
+    return NextResponse.json({ error: 'Format file harus gambar (JPG, PNG, atau WebP).' }, { status: 415 });
+  }
 
   const buffer = Buffer.from(await file.arrayBuffer());
 

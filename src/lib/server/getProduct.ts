@@ -1,49 +1,53 @@
 import { getSql } from '@/lib/db';
-import { isPublished, mergeLiveProducts, mergeProduct, rawFromDoc } from '@/lib/liveProducts';
-import { rowToProductData, type ProductRow } from '@/lib/server/productRow';
+import { buildLiveProducts, isPublished, rawFromDoc } from '@/lib/liveProducts';
+import { PRODUCT_SELECT_COLUMNS, rowToProductData, type ProductRow } from '@/lib/server/productRow';
 import { Product } from '@/types';
 
-// Server-only lookup for a single product, used by /products/[id] (metadata + JSON-LD)
-// and the homepage's featured-product JSON-LD, AND by checkout's live stock check. Always
-// overlays live Postgres data (admin-managed price/stock/name/images/...) onto the static
-// catalog entry, so SEO metadata, structured data, and checkout validation stay in sync
-// with the admin panel instead of only reflecting whatever was baked in at the last deploy.
-// Falls back to the static entry (or undefined) if Postgres has no matching row. A product
-// explicitly unpublished from the admin panel is hidden entirely, even if a static catalog
-// entry exists.
-export async function getMergedProduct(id: string, staticList: Product[]): Promise<Product | undefined> {
-  const base = staticList.find(p => p.id === id);
+// Lookup produk sisi server (generateMetadata, JSON-LD, sitemap, checkout). Sumber satu-satunya
+// adalah tabel Postgres `products` yang dikelola di cishu-admin — tidak ada katalog statis.
+// Produk yang di-unpublish admin dianggap tidak ada.
+
+// Saat `next build`, database bisa saja tidak terjangkau; build tidak boleh gagal karenanya.
+const isBuildPhase = () => process.env.NEXT_PHASE === 'phase-production-build';
+
+// Satu produk by id. null = tidak ada / tidak dipublikasikan. Saat runtime error database
+// DILEMPAR (bukan dianggap "tidak ada") supaya ISR mempertahankan halaman lama alih-alih
+// menyimpan 404 palsu; saat build error ditelan jadi null.
+export async function getLiveProduct(id: string): Promise<Product | null> {
   try {
     const sql = getSql();
-    const [row] = await sql<ProductRow[]>`
-      select id, name, description, details, category, price, original_price, weight, emoji,
-        image_urls, gradient, bg_color, badge, stock_qty, stock, sort_order, published
-      from products where id = ${id}
-    `;
-    if (!row) return base;
+    const [row] = await sql<ProductRow[]>`select ${sql.unsafe(PRODUCT_SELECT_COLUMNS)} from products where id = ${id}`;
+    if (!row) return null;
     const raw = rawFromDoc(row.id, rowToProductData(row));
-    if (!isPublished(raw)) return undefined;
-    return mergeProduct(base, raw);
+    return isPublished(raw) ? buildLiveProducts([raw])[0] : null;
   } catch (err) {
-    console.error('[getMergedProduct]', err);
-    return base;
+    console.error('[getLiveProduct]', err);
+    if (isBuildPhase()) return null;
+    throw err;
   }
 }
 
-// Server-only lookup for the full catalog (static + live Postgres overlay), used
-// where a page needs every product rather than one — e.g. the homepage's price range.
-export async function getAllMergedProducts(staticList: Product[]): Promise<Product[]> {
+// Seluruh katalog yang dipublikasikan (urut sesuai admin). Tidak pernah melempar: database
+// bermasalah -> daftar kosong (dipakai untuk JSON-LD/sitemap yang tidak boleh menjatuhkan halaman).
+export async function getLiveProducts(): Promise<Product[]> {
   try {
     const sql = getSql();
-    const rows = await sql<ProductRow[]>`
-      select id, name, description, details, category, price, original_price, weight, emoji,
-        image_urls, gradient, bg_color, badge, stock_qty, stock, sort_order, published
-      from products
-    `;
-    const fireList = rows.map(r => rawFromDoc(r.id, rowToProductData(r)));
-    return mergeLiveProducts(staticList, fireList);
+    const rows = await sql<ProductRow[]>`select ${sql.unsafe(PRODUCT_SELECT_COLUMNS)} from products where published`;
+    return buildLiveProducts(rows.map(r => rawFromDoc(r.id, rowToProductData(r))));
   } catch (err) {
-    console.error('[getAllMergedProducts]', err);
-    return staticList;
+    console.error('[getLiveProducts]', err);
+    return [];
+  }
+}
+
+// Id produk terpublikasi, untuk generateStaticParams / sitemap. Tidak pernah melempar.
+export async function getLiveProductIds(): Promise<string[]> {
+  try {
+    const sql = getSql();
+    const rows = await sql<{ id: string }[]>`select id from products where published`;
+    return rows.map(r => r.id);
+  } catch (err) {
+    console.error('[getLiveProductIds]', err);
+    return [];
   }
 }

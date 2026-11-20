@@ -23,7 +23,7 @@ type StockState = 'available' | 'low' | 'out';
 const stockState = (p: LapakProduct): StockState => (p.stock <= 0 ? 'out' : p.stock <= LOW_STOCK ? 'low' : 'available');
 const STOCK_STYLE: Record<StockState, { color: string; bg: string; border: string }> = {
   available: { color: '#16A34A', bg: 'rgba(22,163,74,0.1)', border: 'rgba(22,163,74,0.25)' },
-  low: { color: '#D97706', bg: 'rgba(217,119,6,0.1)', border: 'rgba(217,119,6,0.3)' },
+  low: { color: '#B45309', bg: 'rgba(180,83,9,0.1)', border: 'rgba(180,83,9,0.3)' },
   out: { color: '#DC2626', bg: 'rgba(220,38,38,0.08)', border: 'rgba(220,38,38,0.22)' },
 };
 
@@ -104,28 +104,28 @@ export default function LapakPage() {
   const updatedText = updatedAt ? new Date(updatedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
 
   return (
-    <main className="min-h-screen" style={{ background: '#FFFBF5' }}>
+    <main className="min-h-screen" style={{ background: 'var(--ground)' }}>
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-32 md:pb-20">
         <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8 sm:mb-10">
-          <p className="text-amber-600/70 text-sm font-semibold tracking-widest uppercase mb-3">{t.lapak.badge}</p>
+          <p className="text-ink-muted text-sm font-semibold tracking-widest uppercase mb-3">{t.lapak.badge}</p>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold mb-3">
-            <span className="text-amber-950">{t.lapak.title1} </span>
+            <span className="text-brand-950">{t.lapak.title1} </span>
             <span className="gradient-text">{t.lapak.title2}</span>
           </h1>
-          <p className="text-amber-800/55 text-sm sm:text-base max-w-lg mx-auto">{t.lapak.subtitle}</p>
+          <p className="text-ink-muted text-sm sm:text-base max-w-lg mx-auto">{t.lapak.subtitle}</p>
         </motion.div>
 
-        <div className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 mb-6 text-sm text-amber-800/80">
-          <Info size={16} className="mt-0.5 flex-shrink-0 text-amber-600" />
+        <div className="flex items-start gap-2.5 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 mb-6 text-sm text-ink-2">
+          <Info size={16} className="mt-0.5 flex-shrink-0 text-brand-600" />
           <p>{t.lapak.noOrder}</p>
         </div>
 
         {loadError ? (
           <div role="alert" className="flex flex-col items-center justify-center py-24 text-center">
             <div className="text-6xl mb-4" aria-hidden="true">⚠️</div>
-            <p className="text-amber-900 font-semibold mb-4">Gagal memuat, coba lagi</p>
+            <p className="text-brand-900 font-semibold mb-4">Gagal memuat, coba lagi</p>
             <button onClick={retry} className="btn-primary px-5 py-2.5 text-sm font-bold">Coba Lagi</button>
           </div>
         ) : stalls === null ? (
@@ -133,7 +133,7 @@ export default function LapakPage() {
         ) : stalls.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="text-6xl mb-4">🏪</div>
-            <p className="text-amber-900 font-semibold">{t.lapak.noStalls}</p>
+            <p className="text-brand-900 font-semibold">{t.lapak.noStalls}</p>
           </div>
         ) : (
           <>
@@ -141,26 +141,26 @@ export default function LapakPage() {
             <div className="flex gap-2 overflow-x-auto pb-2 mb-4 no-scrollbar">
               {[{ id: 'semua', name: t.lapak.allStalls, count: rows.length, logoUrl: '' }, ...stalls.map(s => ({ id: s.id, name: s.name, count: s.products.length, logoUrl: s.logoUrl }))].map(s => (
                 <button key={s.id} aria-pressed={stallId === s.id} onClick={() => { trackClick('category', `lapak:${s.id}`); setStallId(s.id); setCategory('semua'); }}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex-shrink-0 ${stallId === s.id ? 'text-white shadow-md' : 'bg-white border border-amber-200 text-amber-700/70 hover:border-amber-300 hover:text-amber-800'}`}
-                  style={stallId === s.id ? { background: 'linear-gradient(135deg, #D97706, #F59E0B)' } : {}}>
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex-shrink-0 ${stallId === s.id ? 'text-white shadow-md' : 'bg-white border border-brand-200 text-ink-muted hover:border-brand-300 hover:text-brand-800'}`}
+                  style={stallId === s.id ? { background: 'var(--accent-grad)' } : {}}>
                   {s.logoUrl
                     ? <Image src={s.logoUrl} alt="" width={20} height={20} unoptimized className="w-5 h-5 rounded-full object-cover bg-white" />
                     : <Store size={14} />}
                   <span>{s.name}</span>
-                  <span className={`px-1.5 py-0.5 rounded-full text-xs ${stallId === s.id ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-600'}`}>{s.count}</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-xs ${stallId === s.id ? 'bg-white/25 text-white' : 'bg-brand-100 text-brand-600'}`}>{s.count}</span>
                 </button>
               ))}
             </div>
             {activeStall && (
-              <div className="flex items-center gap-3 rounded-2xl border border-amber-100 bg-white px-4 py-3 mb-4">
-                <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center bg-amber-50 border border-amber-100">
+              <div className="flex items-center gap-3 rounded-2xl border border-brand-100 bg-white px-4 py-3 mb-4">
+                <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center bg-brand-50 border border-brand-100">
                   {activeStall.logoUrl
                     ? <Image src={activeStall.logoUrl} alt={activeStall.name} width={48} height={48} unoptimized className="w-full h-full object-contain" />
-                    : <Store size={20} className="text-amber-500" />}
+                    : <Store size={20} className="text-brand-600" />}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-display font-bold text-amber-950 leading-tight">{activeStall.name}</p>
-                  {activeStall.address && <p className="flex items-center gap-1.5 text-sm text-amber-800/60"><MapPin size={13} className="text-amber-500 flex-shrink-0" /> <span className="truncate">{activeStall.address}</span></p>}
+                  <p className="font-display font-bold text-brand-950 leading-tight">{activeStall.name}</p>
+                  {activeStall.address && <p className="flex items-center gap-1.5 text-sm text-ink-muted"><MapPin size={13} className="text-brand-600 flex-shrink-0" /> <span className="truncate">{activeStall.address}</span></p>}
                 </div>
               </div>
             )}
@@ -168,13 +168,13 @@ export default function LapakPage() {
             {/* Cari + filter */}
             <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <div className="relative flex-1">
-                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500/60" />
+                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" />
                 <input type="text" placeholder={t.lapak.search} value={query} onChange={e => setQuery(e.target.value)}
-                  className="w-full pl-10 pr-10 py-3 rounded-xl input-field text-sm placeholder:text-amber-700/30" />
-                {query && <button onClick={() => setQuery('')} aria-label="Hapus pencarian" className="before:absolute before:-inset-[15px] before:content-[''] absolute right-3.5 top-1/2 -translate-y-1/2 text-amber-500/60 hover:text-amber-700"><X size={14} aria-hidden="true" /></button>}
+                  className="w-full pl-10 pr-10 py-3 rounded-xl input-field text-sm placeholder:text-ink-muted" />
+                {query && <button onClick={() => setQuery('')} aria-label="Hapus pencarian" className="before:absolute before:-inset-[15px] before:content-[''] absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-muted hover:text-brand-700"><X size={14} aria-hidden="true" /></button>}
               </div>
-              <label className="flex items-center gap-2 text-sm text-amber-800/70 px-1 py-2 select-none cursor-pointer">
-                <input type="checkbox" checked={onlyAvailable} onChange={e => setOnlyAvailable(e.target.checked)} className="accent-amber-600" />
+              <label className="flex items-center gap-2 text-sm text-ink-muted px-1 py-2 select-none cursor-pointer">
+                <input type="checkbox" checked={onlyAvailable} onChange={e => setOnlyAvailable(e.target.checked)} className="accent-brand-600" />
                 {t.lapak.onlyAvailable}
               </label>
             </div>
@@ -182,8 +182,8 @@ export default function LapakPage() {
               <div className="flex gap-2 overflow-x-auto pb-2 mb-6 no-scrollbar">
                 {['semua', ...categories.map(c => c[0])].map(c => (
                   <button key={c} onClick={() => setCategory(c)} aria-pressed={category === c}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap flex-shrink-0 transition-all ${category === c ? 'text-white shadow' : 'bg-white border border-amber-200 text-amber-700/70 hover:border-amber-300'}`}
-                    style={category === c ? { background: 'linear-gradient(135deg, #D97706, #F59E0B)' } : {}}>
+                    className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap flex-shrink-0 transition-all ${category === c ? 'text-white shadow' : 'bg-white border border-brand-200 text-ink-muted hover:border-brand-300'}`}
+                    style={category === c ? { background: 'var(--accent-grad)' } : {}}>
                     {c === 'semua' ? t.lapak.allCategory : c}
                   </button>
                 ))}
@@ -191,15 +191,15 @@ export default function LapakPage() {
             )}
 
             <div className="flex items-center justify-between mb-5">
-              <p className="text-amber-800/50 text-sm"><span className="text-amber-700 font-semibold">{filtered.length}</span> {t.lapak.found}</p>
-              {updatedText && <p className="text-xs text-amber-800/40">{t.lapak.updated} {updatedText}</p>}
+              <p className="text-ink-muted text-sm"><span className="text-brand-700 font-semibold">{filtered.length}</span> {t.lapak.found}</p>
+              {updatedText && <p className="text-xs text-ink-muted">{t.lapak.updated} {updatedText}</p>}
             </div>
 
             {filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <div className="text-6xl mb-4">🔍</div>
-                <h3 className="font-display text-xl font-bold text-amber-900/50 mb-2">{t.lapak.notFound}</h3>
-                <p className="text-amber-700/45 text-sm mb-5">{t.lapak.notFoundDesc}</p>
+                <h3 className="font-display text-xl font-bold text-ink-muted mb-2">{t.lapak.notFound}</h3>
+                <p className="text-ink-muted text-sm mb-5">{t.lapak.notFoundDesc}</p>
                 <button onClick={() => { setQuery(''); setCategory('semua'); setStallId('semua'); setOnlyAvailable(false); }} className="btn-primary px-5 py-2.5 text-sm font-bold">{t.lapak.reset}</button>
               </div>
             ) : (
@@ -208,7 +208,7 @@ export default function LapakPage() {
                   const st = stockState(r); const sty = STOCK_STYLE[st]; const Icon = StateIcon(st);
                   return (
                     <button key={`${r.stallId}-${r.id}`} onClick={e => openDetail(r, e.currentTarget)}
-                      className="text-left bg-white rounded-2xl border border-amber-100 overflow-hidden flex flex-col hover:shadow-lg hover:shadow-amber-200/60 hover:border-amber-200 transition-all"
+                      className="text-left bg-white rounded-2xl border border-brand-100 overflow-hidden flex flex-col hover:shadow-lg hover:shadow-brand-200/60 hover:border-brand-200 transition-all"
                       style={{ opacity: st === 'out' ? 0.65 : 1 }}>
                       <div className="relative w-full" style={{ aspectRatio: '1 / 1', background: 'linear-gradient(135deg, #B4530912, #B4530906)' }}>
                         {r.imageUrl
@@ -218,13 +218,13 @@ export default function LapakPage() {
                           style={{ background: sty.bg, border: `1px solid ${sty.border}`, color: sty.color, backdropFilter: 'blur(4px)' }}>
                           <Icon size={10} /> {stateLabel(st)}
                         </span>
-                        {r.kind === 'titipan' && <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-xs font-bold bg-white/90 text-amber-700 border border-amber-200">{t.lapak.consigned}</span>}
+                        {r.kind === 'titipan' && <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-xs font-bold bg-white/90 text-brand-700 border border-brand-200">{t.lapak.consigned}</span>}
                       </div>
                       <div className="p-3 flex flex-col gap-1 flex-1">
-                        <p className="text-sm font-bold text-amber-950 leading-tight line-clamp-2">{r.name}</p>
+                        <p className="text-sm font-bold text-brand-950 leading-tight line-clamp-2">{r.name}</p>
                         {(r.weight || r.category) && <p className={`text-xs truncate ${MUTED}`}>{[r.category, r.weight].filter(Boolean).join(' · ')}</p>}
                         <div className="mt-auto pt-1 flex items-end justify-between gap-2">
-                          <p className="text-sm font-extrabold text-amber-700">{rp(r.price)}</p>
+                          <p className="text-sm font-extrabold text-brand-700">{rp(r.price)}</p>
                           <p className={`text-xs whitespace-nowrap ${MUTED}`}>{t.lapak.stock}: <strong style={{ color: sty.color }}>{r.stock}</strong></p>
                         </div>
                         {stallId === 'semua' && <p className={`text-xs flex items-center gap-1 truncate ${MUTED}`}><Store size={11} aria-hidden="true" /> {r.stallName}</p>}
@@ -249,24 +249,24 @@ export default function LapakPage() {
                 {detail.imageUrl
                   ? <Image src={detail.imageUrl} alt={detail.name} fill sizes="512px" className="object-contain" unoptimized />
                   : <div className="w-full h-full flex items-center justify-center text-7xl">{detail.emoji || '🛍️'}</div>}
-                <button ref={closeBtnRef} onClick={() => setDetail(null)} aria-label={t.lapak.close} className="absolute top-3 right-3 w-11 h-11 rounded-full bg-white/90 shadow flex items-center justify-center text-amber-800"><X size={16} /></button>
+                <button ref={closeBtnRef} onClick={() => setDetail(null)} aria-label={t.lapak.close} className="absolute top-3 right-3 w-11 h-11 rounded-full bg-white/90 shadow flex items-center justify-center text-brand-800"><X size={16} /></button>
               </div>
               <div className="p-5 space-y-3">
                 <div className="flex items-start justify-between gap-3">
-                  <h2 id="lapak-detail-title" className="font-display text-xl font-bold text-amber-950 leading-tight">{detail.name}</h2>
-                  {detail.kind === 'titipan' && <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 flex-shrink-0">{t.lapak.consigned}</span>}
+                  <h2 id="lapak-detail-title" className="font-display text-xl font-bold text-brand-950 leading-tight">{detail.name}</h2>
+                  {detail.kind === 'titipan' && <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-700 flex-shrink-0">{t.lapak.consigned}</span>}
                 </div>
-                <p className="text-2xl font-extrabold text-amber-700">{rp(detail.price)}</p>
+                <p className="text-2xl font-extrabold text-brand-700">{rp(detail.price)}</p>
                 {(() => { const st = stockState(detail); const sty = STOCK_STYLE[st]; const Icon = StateIcon(st); return (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold" style={{ background: sty.bg, border: `1px solid ${sty.border}`, color: sty.color }}>
                     <Icon size={12} /> {stateLabel(st)} · {t.lapak.stock} {detail.stock} {detail.unit}
                   </span>
                 ); })()}
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  {detail.category && <div><p className={`text-xs uppercase tracking-wide ${MUTED} flex items-center gap-1`}><Tag size={10} /> {t.lapak.category}</p><p className="font-semibold text-amber-900">{detail.category}</p></div>}
-                  {detail.weight && <div><p className={`text-xs uppercase tracking-wide ${MUTED} flex items-center gap-1`}><Weight size={10} /> {t.lapak.weight}</p><p className="font-semibold text-amber-900">{detail.weight}</p></div>}
+                  {detail.category && <div><p className={`text-xs uppercase tracking-wide ${MUTED} flex items-center gap-1`}><Tag size={10} /> {t.lapak.category}</p><p className="font-semibold text-brand-900">{detail.category}</p></div>}
+                  {detail.weight && <div><p className={`text-xs uppercase tracking-wide ${MUTED} flex items-center gap-1`}><Weight size={10} /> {t.lapak.weight}</p><p className="font-semibold text-brand-900">{detail.weight}</p></div>}
                   <div className="col-span-2"><p className={`text-xs uppercase tracking-wide ${MUTED} flex items-center gap-1`}><Store size={10} /> {t.lapak.stall}</p>
-                    <p className="font-semibold text-amber-900 flex items-center gap-2">
+                    <p className="font-semibold text-brand-900 flex items-center gap-2">
                       {detailStall?.logoUrl
                         ? <Image src={detailStall.logoUrl} alt="" width={24} height={24} unoptimized className="w-6 h-6 rounded-full object-cover" />
                         : null}
@@ -276,9 +276,9 @@ export default function LapakPage() {
                 </div>
                 <div>
                   <p className={`text-xs uppercase tracking-wide ${MUTED} mb-1`}>{t.lapak.description}</p>
-                  <p className="text-sm text-amber-900/80 whitespace-pre-line">{detail.description || t.lapak.noDescription}</p>
+                  <p className="text-sm text-ink-muted whitespace-pre-line">{detail.description || t.lapak.noDescription}</p>
                 </div>
-                <p className="text-xs text-amber-800/50 flex items-start gap-1.5 pt-1"><Info size={13} className="mt-0.5 flex-shrink-0" /> {t.lapak.noOrder}</p>
+                <p className="text-xs text-ink-muted flex items-start gap-1.5 pt-1"><Info size={13} className="mt-0.5 flex-shrink-0" /> {t.lapak.noOrder}</p>
               </div>
             </motion.div>
           </motion.div>

@@ -9,35 +9,36 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        tea: {
-          50: "#FFF8F0",
-          100: "#FEECD8",
-          200: "#FDD5A8",
-          300: "#FBBB72",
-          400: "#F89A3A",
-          500: "#F67C14",
-          600: "#E66008",
-          700: "#BF470A",
-          800: "#983811",
-          900: "#7C3012",
-          950: "#431507",
+        // Palet Cishu Bite 'n Sip (rose-coral). Nilai ada di :root (globals.css) sebagai
+        // channel RGB supaya modifier opasitas (bg-brand-600/50) tetap bekerja.
+        brand: {
+          50: "rgb(var(--brand-50) / <alpha-value>)",
+          100: "rgb(var(--brand-100) / <alpha-value>)",
+          200: "rgb(var(--brand-200) / <alpha-value>)",
+          300: "rgb(var(--brand-300) / <alpha-value>)",
+          400: "rgb(var(--brand-400) / <alpha-value>)",
+          500: "rgb(var(--brand-500) / <alpha-value>)",
+          600: "rgb(var(--brand-600) / <alpha-value>)",
+          700: "rgb(var(--brand-700) / <alpha-value>)",
+          800: "rgb(var(--brand-800) / <alpha-value>)",
+          900: "rgb(var(--brand-900) / <alpha-value>)",
+          950: "rgb(var(--brand-950) / <alpha-value>)",
+          sky: "rgb(var(--brand-sky) / <alpha-value>)",
+          ice: "rgb(var(--brand-ice) / <alpha-value>)",
+          lime: "rgb(var(--brand-lime) / <alpha-value>)",
+          mint: "rgb(var(--brand-mint) / <alpha-value>)",
         },
-        gold: {
-          300: "#FCD34D",
-          400: "#FBBF24",
-          500: "#F59E0B",
-          600: "#D97706",
-          700: "#B45309",
-        },
-        dark: {
-          100: "#2D1B0E",
-          200: "#1A0A00",
-          300: "#0D0500",
+        ground: "rgb(var(--ground-rgb) / <alpha-value>)",
+        ink: {
+          DEFAULT: "rgb(var(--ink-rgb) / <alpha-value>)",
+          2: "rgb(var(--ink-2-rgb) / <alpha-value>)",
+          muted: "rgb(var(--ink-muted-rgb) / <alpha-value>)",
         },
       },
       fontFamily: {
-        display: ["var(--font-playfair)", "Georgia", "serif"],
-        body: ["var(--font-inter)", "system-ui", "sans-serif"],
+        display: ["var(--font-jakarta)", "system-ui", "sans-serif"],
+        body: ["var(--font-jakarta)", "system-ui", "sans-serif"],
+        sans: ["var(--font-jakarta)", "system-ui", "sans-serif"],
       },
       keyframes: {
         float: {

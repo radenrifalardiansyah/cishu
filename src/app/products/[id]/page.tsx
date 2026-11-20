@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { products } from '@/lib/products';
 import { absoluteUrl } from '@/lib/branding';
 import { getCachedBranding } from '@/lib/server/branding';
 import { imageSrc } from '@/lib/liveProducts';
-import { getMergedProduct } from '@/lib/server/getProduct';
+import { getLiveProduct, getLiveProductIds } from '@/lib/server/getProduct';
 import { stripFormatting } from '@/lib/formatted-text';
 import ProductDetailClient from './ProductDetailClient';
 
@@ -18,8 +17,9 @@ const availabilityMap: Record<string, string> = {
   open_po: 'https://schema.org/PreOrder',
 };
 
-export function generateStaticParams() {
-  return products.map(product => ({ id: product.id }));
+export async function generateStaticParams() {
+  const ids = await getLiveProductIds();
+  return ids.map(id => ({ id }));
 }
 
 export async function generateMetadata(
@@ -27,7 +27,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { id } = await params;
   const [product, branding] = await Promise.all([
-    getMergedProduct(id, products),
+    getLiveProduct(id),
     getCachedBranding(),
   ]);
   if (!product) return {};
@@ -62,7 +62,7 @@ export default async function ProductDetailPage(
 ) {
   const { id } = await params;
   const [product, branding] = await Promise.all([
-    getMergedProduct(id, products),
+    getLiveProduct(id),
     getCachedBranding(),
   ]);
   if (!product) notFound();

@@ -19,7 +19,6 @@ import { formatCurrency } from '@/lib/whatsapp';
 import { CustomerInfo } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { getProductLocale } from '@/lib/product-translations';
 import toast from 'react-hot-toast';
 
 const defaultCustomer: CustomerInfo = {
@@ -33,7 +32,7 @@ export default function CheckoutPage() {
   const [customer, setCustomer] = useState<CustomerInfo>(defaultCustomer);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'cart' | 'info' | 'confirm'>('cart');
-  const { t, locale } = useLanguage();
+  const { t } = useLanguage();
 
   // Checkout wajib login — nomor HP akun jadi identitas pesanan, tidak bisa diubah manual.
   useEffect(() => {
@@ -205,21 +204,21 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="min-h-screen" style={{ background: '#FFFBF5' }}>
+    <main className="min-h-screen" style={{ background: 'var(--ground)' }}>
       <Navbar />
       <Cart />
 
       {/* Mobile sticky top bar */}
-      <div className="sticky top-16 z-30 bg-amber-50/90 backdrop-blur-md border-b border-amber-100 md:hidden">
+      <div className="sticky top-16 z-30 bg-brand-50/90 backdrop-blur-md border-b border-brand-100 md:hidden">
         <div className="flex items-center gap-3 px-4 h-14">
           <button
             onClick={() => router.back()}
             aria-label="Kembali"
-            className="relative before:absolute before:-inset-1 before:content-[''] w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-amber-200 text-amber-700 flex-shrink-0"
+            className="relative before:absolute before:-inset-1 before:content-[''] w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-brand-200 text-brand-700 flex-shrink-0"
           >
             <ArrowLeft size={18} aria-hidden="true" />
           </button>
-          <p aria-hidden="true" className="font-display font-bold text-amber-900 text-sm line-clamp-1 flex-1">
+          <p aria-hidden="true" className="font-display font-bold text-brand-900 text-sm line-clamp-1 flex-1">
             {t.checkout.title1} {t.checkout.title2}
           </p>
         </div>
@@ -230,15 +229,15 @@ export default function CheckoutPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <Link
             href="/products"
-            className="hidden md:inline-flex items-center gap-1.5 text-amber-600/70 hover:text-amber-700 text-sm mb-5 transition-colors"
+            className="hidden md:inline-flex items-center gap-1.5 text-ink-muted hover:text-brand-700 text-sm mb-5 transition-colors"
           >
             <ArrowLeft size={14} /> {t.checkout.backToMenu}
           </Link>
           <h1 className="font-display text-3xl sm:text-4xl font-bold mb-1">
-            <span className="text-amber-950">{t.checkout.title1} </span>
+            <span className="text-brand-950">{t.checkout.title1} </span>
             <span className="gradient-text">{t.checkout.title2}</span>
           </h1>
-          <p className="text-amber-800/55 text-sm">{t.checkout.subtitle}</p>
+          <p className="text-ink-muted text-sm">{t.checkout.subtitle}</p>
         </motion.div>
 
         {/* Step indicator */}
@@ -257,9 +256,9 @@ export default function CheckoutPage() {
               <div key={s.id} className="flex items-center">
                 <div
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
-                    isActive ? 'text-white shadow-md' : isDone ? 'text-amber-600 bg-amber-100' : 'text-amber-800/40 bg-transparent'
+                    isActive ? 'text-white shadow-md' : isDone ? 'text-brand-600 bg-brand-100' : 'text-ink-muted bg-transparent'
                   }`}
-                  style={isActive ? { background: 'linear-gradient(135deg, #D97706, #F59E0B)' } : {}}
+                  style={isActive ? { background: 'var(--accent-grad)' } : {}}
                 >
                   <Icon size={12} />
                   <span className="hidden sm:inline">{s.label}</span>
@@ -267,7 +266,7 @@ export default function CheckoutPage() {
                 {i < stepInfo.length - 1 && (
                   <ChevronRight
                     size={13}
-                    className={`mx-1 ${i < currentIdx ? 'text-amber-500' : 'text-amber-300'}`}
+                    className={`mx-1 ${i < currentIdx ? 'text-brand-600' : 'text-brand-300'}`}
                   />
                 )}
               </div>
@@ -285,33 +284,32 @@ export default function CheckoutPage() {
               exit={{ opacity: 0, x: -25 }}
               transition={{ duration: 0.25 }}
             >
-              <div className="bg-white rounded-2xl border border-amber-100 overflow-hidden mb-4 shadow-sm">
-                <div className="px-5 py-4 border-b border-amber-100 flex items-center justify-between">
-                  <h2 className="font-display font-bold text-amber-950 flex items-center gap-2 text-base">
-                    <ShoppingBag size={16} className="text-amber-600" /> {t.checkout.orderSummary}
+              <div className="bg-white rounded-2xl border border-brand-100 overflow-hidden mb-4 shadow-sm">
+                <div className="px-5 py-4 border-b border-brand-100 flex items-center justify-between">
+                  <h2 className="font-display font-bold text-brand-950 flex items-center gap-2 text-base">
+                    <ShoppingBag size={16} className="text-brand-600" /> {t.checkout.orderSummary}
                   </h2>
-                  <span className="text-amber-600/60 text-sm">{totalItems} {t.cart.item}</span>
+                  <span className="text-ink-muted text-sm">{totalItems} {t.cart.item}</span>
                 </div>
 
                 {items.length === 0 ? (
                   <div className="p-10 text-center">
                     <div className="text-5xl mb-3">🛒</div>
-                    <p className="text-amber-800/50 text-sm mb-4">{t.checkout.emptyCart}</p>
+                    <p className="text-ink-muted text-sm mb-4">{t.checkout.emptyCart}</p>
                     <Link href="/products" className="btn-primary inline-block px-5 py-2.5 text-sm font-bold">
                       {t.cart.seeMenu}
                     </Link>
                   </div>
                 ) : (
-                  <div className="divide-y divide-amber-50">
+                  <div className="divide-y divide-brand-50">
                     {items.map(item => {
-                    const lp = getProductLocale(item.product.id, locale, item.product);
                     return (
                       <motion.div key={item.product.id} layout className="flex items-center gap-3 px-5 py-3.5">
-                        <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 border border-amber-100">
+                        <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 border border-brand-100">
                           {item.product.images?.[0] ? (
                             <Image
                               src={item.product.images[0]}
-                              alt={lp.name}
+                              alt={item.product.name}
                               width={44}
                               height={44}
                               className="w-full h-full object-cover"
@@ -326,18 +324,18 @@ export default function CheckoutPage() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-amber-950 text-sm truncate">{lp.name}</p>
-                          <p className="text-amber-600 text-sm font-bold">{formatCurrency(item.product.price * item.quantity)}</p>
+                          <p className="font-semibold text-brand-950 text-sm truncate">{item.product.name}</p>
+                          <p className="text-brand-600 text-sm font-bold">{formatCurrency(item.product.price * item.quantity)}</p>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} aria-label={`Kurangi jumlah ${lp.name}`} className="relative before:absolute before:-inset-2 before:content-[''] w-7 h-7 rounded-lg flex items-center justify-center bg-amber-100 hover:bg-amber-200 text-amber-700 border border-amber-200">
+                          <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} aria-label={`Kurangi jumlah ${item.product.name}`} className="relative before:absolute before:-inset-2 before:content-[''] w-7 h-7 rounded-lg flex items-center justify-center bg-brand-100 hover:bg-brand-200 text-brand-700 border border-brand-200">
                             <Minus size={10} aria-hidden="true" />
                           </button>
-                          <span className="text-amber-950 text-sm font-bold w-5 text-center">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} aria-label={`Tambah jumlah ${lp.name}`} className="relative before:absolute before:-inset-2 before:content-[''] w-7 h-7 rounded-lg flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-white border border-amber-500">
+                          <span className="text-brand-950 text-sm font-bold w-5 text-center">{item.quantity}</span>
+                          <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} aria-label={`Tambah jumlah ${item.product.name}`} className="relative before:absolute before:-inset-2 before:content-[''] w-7 h-7 rounded-lg flex items-center justify-center bg-brand-600 hover:bg-brand-700 text-white border border-brand-500">
                             <Plus size={10} aria-hidden="true" />
                           </button>
-                          <button onClick={() => removeItem(item.product.id)} aria-label={`Hapus ${lp.name} dari keranjang`} className="relative before:absolute before:-inset-2 before:content-[''] w-7 h-7 rounded-lg flex items-center justify-center text-red-400/60 hover:text-red-500 hover:bg-red-50 ml-3">
+                          <button onClick={() => removeItem(item.product.id)} aria-label={`Hapus ${item.product.name} dari keranjang`} className="relative before:absolute before:-inset-2 before:content-[''] w-7 h-7 rounded-lg flex items-center justify-center text-red-400/60 hover:text-red-500 hover:bg-red-50 ml-3">
                             <Trash2 size={11} aria-hidden="true" />
                           </button>
                         </div>
@@ -348,8 +346,8 @@ export default function CheckoutPage() {
               </div>
 
               {items.length > 0 && (
-                <div className="bg-amber-50 rounded-2xl border border-amber-100 p-4 mb-4">
-                  <div className="flex justify-between text-sm text-amber-700/60 mb-1.5">
+                <div className="bg-brand-50 rounded-2xl border border-brand-100 p-4 mb-4">
+                  <div className="flex justify-between text-sm text-ink-muted mb-1.5">
                     <span>{t.checkout.subtotal} ({totalItems} {t.cart.item})</span>
                     <span>{formatCurrency(totalPrice)}</span>
                   </div>
@@ -359,11 +357,11 @@ export default function CheckoutPage() {
                       <span>- {formatCurrency(discountAmount)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between items-center pt-2 border-t border-amber-200/50">
-                    <span className="font-display font-bold text-amber-950">{t.checkout.total}</span>
+                  <div className="flex justify-between items-center pt-2 border-t border-brand-200/50">
+                    <span className="font-display font-bold text-brand-950">{t.checkout.total}</span>
                     <span className="font-display text-xl font-bold gradient-text">{formatCurrency(grandTotal)}</span>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-amber-200/50">
+                  <div className="mt-3 pt-3 border-t border-brand-200/50">
                     {voucher ? (
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-green-700 font-semibold">{voucher.code}</span>
@@ -381,12 +379,12 @@ export default function CheckoutPage() {
                             id="checkout-voucher"
                             aria-invalid={voucherError ? true : undefined}
                             aria-describedby={voucherError ? 'checkout-voucher-error' : undefined}
-                            className="flex-1 min-w-0 rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm text-amber-950 outline-none focus:border-amber-400"
+                            className="flex-1 min-w-0 rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-brand-950 outline-none focus:border-brand-400"
                           />
                           <button
                             onClick={applyVoucher}
                             disabled={!voucherInput.trim() || voucherChecking}
-                            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold disabled:opacity-40"
+                            className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold disabled:opacity-40"
                           >
                             {t.checkout.voucherApply}
                           </button>
@@ -420,16 +418,16 @@ export default function CheckoutPage() {
               transition={{ duration: 0.25 }}
               className="space-y-4"
             >
-              <div className="bg-white rounded-2xl border border-amber-100 p-5 sm:p-6 space-y-5 shadow-sm">
-                <h2 className="font-display font-bold text-amber-950 flex items-center gap-2">
-                  <User size={16} className="text-amber-600" /> {t.checkout.formTitle}
+              <div className="bg-white rounded-2xl border border-brand-100 p-5 sm:p-6 space-y-5 shadow-sm">
+                <h2 className="font-display font-bold text-brand-950 flex items-center gap-2">
+                  <User size={16} className="text-brand-600" /> {t.checkout.formTitle}
                 </h2>
 
                 {/* Name */}
                 <div>
-                  <label htmlFor="checkout-name" className="text-amber-700/60 text-xs font-semibold uppercase tracking-wider mb-1.5 block">{t.checkout.name}</label>
+                  <label htmlFor="checkout-name" className="text-ink-muted text-xs font-semibold uppercase tracking-wider mb-1.5 block">{t.checkout.name}</label>
                   <div className="relative">
-                    <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500/60" />
+                    <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" />
                     <input
                       id="checkout-name"
                       type="text" value={customer.name} onChange={e => updateField('name', e.target.value)}
@@ -444,24 +442,24 @@ export default function CheckoutPage() {
 
                 {/* Phone — locked to the logged-in account, it's the order's identity */}
                 <div>
-                  <label htmlFor="checkout-phone" className="text-amber-700/60 text-xs font-semibold uppercase tracking-wider mb-1.5 block">{t.checkout.phone}</label>
+                  <label htmlFor="checkout-phone" className="text-ink-muted text-xs font-semibold uppercase tracking-wider mb-1.5 block">{t.checkout.phone}</label>
                   <div className="relative">
-                    <Phone size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500/60" />
+                    <Phone size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" />
                     <input
                       id="checkout-phone"
                       type="tel" value={customer.phone} readOnly disabled
                       aria-invalid={fieldErrors.phone ? true : undefined}
                       aria-describedby={fieldErrors.phone ? 'checkout-phone-error checkout-phone-hint' : 'checkout-phone-hint'}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl input-field text-sm bg-amber-50/60 text-amber-800/70 cursor-not-allowed"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl input-field text-sm bg-brand-50/60 text-ink-muted cursor-not-allowed"
                     />
                   </div>
-                  <p id="checkout-phone-hint" className="text-amber-700/40 text-[11px] mt-1">Nomor akun Anda, tidak bisa diubah di sini.</p>
+                  <p id="checkout-phone-hint" className="text-ink-muted text-[11px] mt-1">Nomor akun Anda, tidak bisa diubah di sini.</p>
                   {fieldErrors.phone && <p id="checkout-phone-error" role="alert" className="text-red-600 text-xs mt-1">{fieldErrors.phone}</p>}
                 </div>
 
                 {/* Delivery method */}
                 <div role="group" aria-labelledby="checkout-method-label">
-                  <span id="checkout-method-label" className="text-amber-700/60 text-xs font-semibold uppercase tracking-wider mb-2 block">{t.checkout.method}</span>
+                  <span id="checkout-method-label" className="text-ink-muted text-xs font-semibold uppercase tracking-wider mb-2 block">{t.checkout.method}</span>
                   <div className="grid grid-cols-2 gap-3">
                     {(['pickup', 'delivery'] as const).map(method => (
                       <button
@@ -471,9 +469,9 @@ export default function CheckoutPage() {
                         className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-semibold transition-all ${
                           customer.deliveryMethod === method
                             ? 'text-white border-transparent shadow-md'
-                            : 'bg-white border-amber-200 text-amber-700/70 hover:border-amber-300'
+                            : 'bg-white border-brand-200 text-ink-muted hover:border-brand-300'
                         }`}
-                        style={customer.deliveryMethod === method ? { background: 'linear-gradient(135deg, #D97706, #F59E0B)' } : {}}
+                        style={customer.deliveryMethod === method ? { background: 'var(--accent-grad)' } : {}}
                       >
                         {method === 'pickup' ? <><Package size={14} /> {t.checkout.pickup}</> : <><Truck size={14} /> {t.checkout.delivery}</>}
                       </button>
@@ -489,9 +487,9 @@ export default function CheckoutPage() {
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
                     >
-                      <label htmlFor="checkout-address" className="text-amber-700/60 text-xs font-semibold uppercase tracking-wider mb-1.5 block">{t.checkout.address}</label>
+                      <label htmlFor="checkout-address" className="text-ink-muted text-xs font-semibold uppercase tracking-wider mb-1.5 block">{t.checkout.address}</label>
                       <div className="relative">
-                        <MapPin size={14} className="absolute left-3.5 top-3.5 text-amber-500/60" />
+                        <MapPin size={14} className="absolute left-3.5 top-3.5 text-ink-muted" />
                         <textarea
                           id="checkout-address"
                           value={customer.address} onChange={e => updateField('address', e.target.value)}
@@ -509,9 +507,9 @@ export default function CheckoutPage() {
 
                 {/* Note */}
                 <div>
-                  <label htmlFor="checkout-note" className="text-amber-700/60 text-xs font-semibold uppercase tracking-wider mb-1.5 block">{t.checkout.note}</label>
+                  <label htmlFor="checkout-note" className="text-ink-muted text-xs font-semibold uppercase tracking-wider mb-1.5 block">{t.checkout.note}</label>
                   <div className="relative">
-                    <FileText size={14} className="absolute left-3.5 top-3.5 text-amber-500/60" />
+                    <FileText size={14} className="absolute left-3.5 top-3.5 text-ink-muted" />
                     <textarea
                       id="checkout-note"
                       value={customer.note} onChange={e => updateField('note', e.target.value)}
@@ -549,22 +547,21 @@ export default function CheckoutPage() {
               className="space-y-4"
             >
               {/* Order summary */}
-              <div className="bg-white rounded-2xl border border-amber-100 overflow-hidden shadow-sm">
-                <div className="px-5 py-4 border-b border-amber-50">
-                  <h2 className="font-display font-bold text-amber-950 flex items-center gap-2 text-base">
-                    <ShoppingBag size={16} className="text-amber-600" /> {t.checkout.yourOrder}
+              <div className="bg-white rounded-2xl border border-brand-100 overflow-hidden shadow-sm">
+                <div className="px-5 py-4 border-b border-brand-50">
+                  <h2 className="font-display font-bold text-brand-950 flex items-center gap-2 text-base">
+                    <ShoppingBag size={16} className="text-brand-600" /> {t.checkout.yourOrder}
                   </h2>
                 </div>
-                <div className="divide-y divide-amber-50">
+                <div className="divide-y divide-brand-50">
                   {items.map(item => {
-                    const lp = getProductLocale(item.product.id, locale, item.product);
                     return (
                     <div key={item.product.id} className="flex items-center gap-3 px-5 py-3">
-                      <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-amber-100">
+                      <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-brand-100">
                         {item.product.images?.[0] ? (
                           <Image
                             src={item.product.images[0]}
-                            alt={lp.name}
+                            alt={item.product.name}
                             width={40}
                             height={40}
                             className="w-full h-full object-cover"
@@ -576,15 +573,15 @@ export default function CheckoutPage() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-amber-950 text-sm font-semibold truncate">{lp.name}</p>
-                        <p className="text-amber-700/55 text-xs">{formatCurrency(item.product.price)} × {item.quantity}</p>
+                        <p className="text-brand-950 text-sm font-semibold truncate">{item.product.name}</p>
+                        <p className="text-ink-muted text-xs">{formatCurrency(item.product.price)} × {item.quantity}</p>
                       </div>
-                      <p className="text-amber-600 text-sm font-bold">{formatCurrency(item.product.price * item.quantity)}</p>
+                      <p className="text-brand-600 text-sm font-bold">{formatCurrency(item.product.price * item.quantity)}</p>
                     </div>
                   );})}
                 </div>
-                <div className="px-5 py-4 border-t border-amber-100 bg-amber-50 flex justify-between items-center">
-                  <span className="font-display font-bold text-amber-950">{t.checkout.total}</span>
+                <div className="px-5 py-4 border-t border-brand-100 bg-brand-50 flex justify-between items-center">
+                  <span className="font-display font-bold text-brand-950">{t.checkout.total}</span>
                   <span className="text-right">
                     {voucher && discountAmount > 0 && (
                       <span className="block text-xs text-green-700 font-medium">{voucher.label}: - {formatCurrency(discountAmount)}</span>
@@ -595,9 +592,9 @@ export default function CheckoutPage() {
               </div>
 
               {/* Customer info */}
-              <div className="bg-white rounded-2xl border border-amber-100 p-5 space-y-3 shadow-sm">
-                <h2 className="font-display font-bold text-amber-950 flex items-center gap-2 text-base">
-                  <User size={16} className="text-amber-600" /> {t.checkout.orderInfo}
+              <div className="bg-white rounded-2xl border border-brand-100 p-5 space-y-3 shadow-sm">
+                <h2 className="font-display font-bold text-brand-950 flex items-center gap-2 text-base">
+                  <User size={16} className="text-brand-600" /> {t.checkout.orderInfo}
                 </h2>
                 {[
                   { icon: User, label: t.checkout.infoName, value: customer.name },
@@ -607,10 +604,10 @@ export default function CheckoutPage() {
                   ...(customer.note ? [{ icon: FileText, label: t.checkout.infoNote, value: customer.note }] : []),
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-start gap-3">
-                    <Icon size={13} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                    <Icon size={13} className="text-brand-600 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-amber-700/50 text-xs">{label}</p>
-                      <p className="text-amber-950 text-sm">{value}</p>
+                      <p className="text-ink-muted text-xs">{label}</p>
+                      <p className="text-brand-950 text-sm">{value}</p>
                     </div>
                   </div>
                 ))}

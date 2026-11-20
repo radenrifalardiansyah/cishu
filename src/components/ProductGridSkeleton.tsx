@@ -14,12 +14,12 @@ export default function ProductGridSkeleton({
     <div role="status" aria-busy="true" aria-live="polite" className={gridClassName}>
       <span className="sr-only">{label}</span>
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} aria-hidden="true" className="rounded-2xl border border-amber-100 bg-white overflow-hidden">
-          <div className="animate-pulse bg-amber-100 w-full" style={{ aspectRatio: '1 / 1' }} />
+        <div key={i} aria-hidden="true" className="rounded-2xl border border-brand-100 bg-white overflow-hidden">
+          <div className="animate-pulse bg-brand-100 w-full" style={{ aspectRatio: '1 / 1' }} />
           <div className="p-3 sm:p-4 space-y-2.5">
-            <div className="animate-pulse bg-amber-100 h-4 rounded w-3/4" />
-            <div className="animate-pulse bg-amber-100 h-3 rounded w-1/2" />
-            <div className="animate-pulse bg-amber-100 h-5 rounded w-1/3 mt-3" />
+            <div className="animate-pulse bg-brand-100 h-4 rounded w-3/4" />
+            <div className="animate-pulse bg-brand-100 h-3 rounded w-1/2" />
+            <div className="animate-pulse bg-brand-100 h-5 rounded w-1/3 mt-3" />
           </div>
         </div>
       ))}

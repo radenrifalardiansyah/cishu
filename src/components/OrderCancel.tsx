@@ -12,7 +12,7 @@ export function PaymentDeadlineNote({ createdAt, className = '' }: { createdAt?:
   if (!deadline) return null;
   const expired = isPaymentExpired(deadline);
   return (
-    <p className={`text-xs flex items-center gap-1.5 ${expired ? 'text-red-600 font-semibold' : 'text-amber-700/70'} ${className}`}>
+    <p className={`text-xs flex items-center gap-1.5 ${expired ? 'text-red-600 font-semibold' : 'text-ink-muted'} ${className}`}>
       <Clock size={12} aria-hidden="true" className="shrink-0" />
       {expired ? 'Batas bayar sudah terlewat, segera selesaikan pembayaran atau hubungi kami' : `Bayar sebelum ${formatDeadlineWib(deadline)}`}
     </p>
@@ -67,8 +67,8 @@ export function CancelOrderButton({
             onClick={e => e.stopPropagation()}
             className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl"
           >
-            <h2 id="cancel-title" className="font-display font-bold text-amber-950 text-lg mb-2">Batalkan pesanan?</h2>
-            <p id="cancel-desc" className="text-amber-800/70 text-sm mb-5">
+            <h2 id="cancel-title" className="font-display font-bold text-brand-950 text-lg mb-2">Batalkan pesanan?</h2>
+            <p id="cancel-desc" className="text-ink-muted text-sm mb-5">
               Pesanan {invoiceNo} akan dibatalkan dan tidak bisa dikembalikan. Voucher yang dipakai akan dikembalikan.
             </p>
             <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">

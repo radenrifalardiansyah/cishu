@@ -1,5 +1,8 @@
-// Batas bayar pesanan portal: 24 jam sejak pesanan dibuat. Pembatalan otomatis oleh cron di admin
-// belum dijadwalkan (workflow masih manual), jadi teks pelanggan tidak menjanjikannya. Konstanta ini satu-satunya sumber untuk tampilan pelanggan.
+// Batas bayar pesanan portal: 24 jam sejak pesanan dibuat. Nilainya harus sama dengan
+// UNPAID_ORDER_EXPIRY_HOURS di cishu-admin/src/lib/order-expiry.ts: pesanan portal yang belum
+// dibayar, belum ada bukti, dan belum diproses dibatalkan otomatis oleh cron admin
+// (/api/cron/expire-unpaid-orders, dijadwalkan GitHub Actions di repo admin).
+// Konstanta ini satu-satunya sumber untuk tampilan pelanggan.
 export const PAYMENT_WINDOW_HOURS = 24;
 export const PAYMENT_WINDOW_MS = PAYMENT_WINDOW_HOURS * 60 * 60 * 1000;
 

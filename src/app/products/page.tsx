@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
@@ -9,13 +10,12 @@ import Navbar from '@/components/Navbar';
 import Cart from '@/components/Cart';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
-import ProductBanner from '@/components/ProductBanner';
+import BrandBanner from '@/components/BrandBanner';
 import ProductGridSkeleton from '@/components/ProductGridSkeleton';
 import BottomNav from '@/components/BottomNav';
-import { categoryData } from '@/lib/products';
 import { Category, Product } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useLiveProducts } from '@/lib/useLiveProducts';
+import { useLiveProductsState } from '@/lib/useLiveProducts';
 import { useLiveCategories } from '@/lib/useLiveCategories';
 import { trackClick } from '@/lib/trackClick';
 
@@ -26,7 +26,8 @@ function ProductsPage() {
   const [sortBy, setSortBy] = useState<'default' | 'price-asc' | 'price-desc'>('default');
   const [showSort, setShowSort] = useState(false);
   const { t } = useLanguage();
-  const products = useLiveProducts();
+  const { products, loading, error } = useLiveProductsState();
+  const hasProducts = products.length > 0;
   const liveCategories = useLiveCategories();
 
   // Mouse drag-to-scroll for the category tabs row, so desktop users (no touchpad
@@ -76,32 +77,16 @@ function ProductsPage() {
   };
 
   const allTab = { id: 'semua' as Category, name: t.products.allCategory, emoji: '🛒', count: products.length };
-  const catNames = t.footer.categories;
-  // Older category docs (migrated before the admin form had an emoji field) fall back
-  // to a name match against the 4 seeded ids (e.g. 'mie' -> 'mie-kremes' kept the name).
-  const emojiByName = Object.fromEntries(categoryData.map(c => [c.name.toLowerCase(), c.emoji])) as Record<string, string>;
-  const liveIds = new Set<string>(liveCategories.map(c => c.id));
-  // The admin's live category collection is the master data — it decides which
-  // categories exist, what they're named, and (via the admin's emoji picker) their icon.
+  // Koleksi kategori admin adalah data master: menentukan kategori, nama, dan ikon.
   const masterTabs = liveCategories
     .filter(c => products.some(p => p.category === c.id))
     .map(c => ({
       id: c.id as Category,
-      name: catNames[c.id as keyof typeof catNames] ?? c.name,
-      emoji: c.emoji || emojiByName[c.name.toLowerCase()] || '🏷️',
+      name: c.name,
+      emoji: c.emoji || '🏷️',
       count: products.filter(p => p.category === c.id).length,
     }));
-  // Legacy safety net: a seeded id with real products that never got a matching
-  // Firestore doc (pre-dating admin-managed categories) still needs a browsable tab.
-  const legacyTabs = categoryData
-    .filter(c => !liveIds.has(c.id) && products.some(p => p.category === c.id))
-    .map(c => ({
-      ...c,
-      id: c.id as Category,
-      name: catNames[c.id as keyof typeof catNames] ?? c.name,
-      count: products.filter(p => p.category === c.id).length,
-    }));
-  const tabs = [allTab, ...masterTabs, ...legacyTabs];
+  const tabs = [allTab, ...masterTabs];
 
   useEffect(() => {
     const cat = searchParams.get('category') as Category | null;
@@ -110,7 +95,7 @@ function ProductsPage() {
 
   // Category banners are managed in the admin dashboard and joined here by doc id
   // (the same id stored in each product's `category` field), not by display name.
-  const activeCategoryMeta = [...masterTabs, ...legacyTabs].find(c => c.id === activeCategory);
+  const activeCategoryMeta = masterTabs.find(c => c.id === activeCategory);
   const activeBannerUrl = liveCategories.find(c => c.id === activeCategory)?.bannerUrl || undefined;
 
   const filtered = useMemo(() => {
@@ -135,7 +120,7 @@ function ProductsPage() {
   };
 
   return (
-    <main className="min-h-screen" style={{ background: '#FFFBF5' }}>
+    <main className="min-h-screen" style={{ background: 'var(--ground)' }}>
       <Navbar />
       <Cart />
 
@@ -146,16 +131,18 @@ function ProductsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10 sm:mb-14"
         >
-          <p className="text-amber-600/70 text-sm font-semibold tracking-widest uppercase mb-3">
+          <p className="text-ink-muted text-sm font-semibold tracking-widest uppercase mb-3">
             {t.products.badge}
           </p>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold mb-3">
-            <span className="text-amber-950">{t.products.title1} </span>
+            <span className="text-brand-950">{t.products.title1} </span>
             <span className="gradient-text">{t.products.title2}</span>
           </h1>
-          <p className="text-amber-800/55 text-sm sm:text-base max-w-md mx-auto">
-            {products.length} {t.products.subtitleSuffix}
-          </p>
+          {hasProducts && (
+            <p className="text-ink-muted text-sm sm:text-base max-w-md mx-auto">
+              {products.length} {t.products.subtitleSuffix}
+            </p>
+          )}
         </motion.div>
 
         {/* Banner — swaps to the active category's banner when the admin has set one */}
@@ -183,11 +170,13 @@ function ProductsPage() {
                 />
               </div>
             ) : (
-              <ProductBanner />
+              <BrandBanner />
             )}
           </motion.div>
         </AnimatePresence>
 
+        {hasProducts && (
+        <>
         {/* Search + Sort */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
@@ -196,19 +185,19 @@ function ProductsPage() {
           className="flex gap-3 mb-6"
         >
           <div className="relative flex-1">
-            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500/60" />
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" />
             <input
               type="text"
               placeholder={t.products.search}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-3 rounded-xl input-field text-sm placeholder:text-amber-700/30"
+              className="w-full pl-10 pr-10 py-3 rounded-xl input-field text-sm placeholder:text-ink-muted"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
                 aria-label="Hapus pencarian"
-                className="before:absolute before:-inset-[15px] before:content-[''] absolute right-3.5 top-1/2 -translate-y-1/2 text-amber-500/60 hover:text-amber-700"
+                className="before:absolute before:-inset-[15px] before:content-[''] absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-muted hover:text-brand-700"
               >
                 <X size={14} aria-hidden="true" />
               </button>
@@ -221,8 +210,8 @@ function ProductsPage() {
               aria-expanded={showSort}
               className={`flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
                 showSort
-                  ? 'bg-amber-100 border-amber-300 text-amber-800'
-                  : 'bg-white border-amber-200 text-amber-700/70 hover:border-amber-300 hover:text-amber-800'
+                  ? 'bg-brand-100 border-brand-300 text-brand-800'
+                  : 'bg-white border-brand-200 text-ink-muted hover:border-brand-300 hover:text-brand-800'
               }`}
             >
               <SlidersHorizontal size={14} />
@@ -236,7 +225,7 @@ function ProductsPage() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 6, scale: 0.97 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl border border-amber-100 shadow-xl z-20 overflow-hidden"
+                  className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl border border-brand-100 shadow-xl z-20 overflow-hidden"
                 >
                   {Object.entries(sortLabels).map(([key, label]) => (
                     <button
@@ -245,8 +234,8 @@ function ProductsPage() {
                       onClick={() => { setSortBy(key as typeof sortBy); setShowSort(false); }}
                       className={`w-full text-left px-4 py-3 text-sm transition-colors ${
                         sortBy === key
-                          ? 'bg-amber-50 text-amber-700 font-semibold'
-                          : 'text-amber-900/60 hover:bg-amber-50 hover:text-amber-800'
+                          ? 'bg-brand-50 text-brand-700 font-semibold'
+                          : 'text-ink-muted hover:bg-brand-50 hover:text-brand-800'
                       }`}
                     >
                       {label}
@@ -281,11 +270,11 @@ function ProductsPage() {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
                 activeCategory === tab.id
                   ? 'text-white shadow-md'
-                  : 'bg-white border border-amber-200 text-amber-700/70 hover:border-amber-300 hover:text-amber-800'
+                  : 'bg-white border border-brand-200 text-ink-muted hover:border-brand-300 hover:text-brand-800'
               }`}
               style={
                 activeCategory === tab.id
-                  ? { background: 'linear-gradient(135deg, #D97706, #F59E0B)' }
+                  ? { background: 'var(--accent-grad)' }
                   : {}
               }
             >
@@ -295,7 +284,7 @@ function ProductsPage() {
                 className={`px-1.5 py-0.5 rounded-full text-xs ${
                   activeCategory === tab.id
                     ? 'bg-white/25 text-white'
-                    : 'bg-amber-100 text-amber-600'
+                    : 'bg-brand-100 text-brand-600'
                 }`}
               >
                 {tab.count}
@@ -306,15 +295,44 @@ function ProductsPage() {
 
         {/* Count */}
         <div className="flex items-center mb-5">
-          <p className="text-amber-800/50 text-sm">
-            <span className="text-amber-700 font-semibold">{filtered.length}</span> {t.products.found}
+          <p className="text-ink-muted text-sm">
+            <span className="text-brand-700 font-semibold">{filtered.length}</span> {t.products.found}
             {searchQuery && (
-              <span> {t.products.foundFor} <span className="text-amber-600 font-semibold">&quot;{searchQuery}&quot;</span></span>
+              <span> {t.products.foundFor} <span className="text-brand-600 font-semibold">&quot;{searchQuery}&quot;</span></span>
             )}
           </p>
         </div>
 
+        </>
+        )}
+
         {/* Grid */}
+        {!hasProducts ? (
+          loading ? (
+            <ProductGridSkeleton />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-center max-w-sm mx-auto" role={error ? 'alert' : undefined}>
+              <div className="text-6xl mb-4" aria-hidden="true">{error ? '⚠️' : '🛍️'}</div>
+              <h3 className="font-display text-xl font-bold text-brand-950 mb-2">
+                {error ? 'Gagal memuat produk' : 'Belum ada produk'}
+              </h3>
+              <p className="text-ink-muted text-sm mb-5">
+                {error
+                  ? 'Periksa koneksi internet kamu, lalu coba lagi.'
+                  : 'Produk akan segera tersedia. Kembali lagi nanti ya.'}
+              </p>
+              {error ? (
+                <button onClick={() => window.location.reload()} className="btn-primary px-5 py-2.5 text-sm font-bold">
+                  Coba lagi
+                </button>
+              ) : (
+                <Link href="/" className="btn-primary inline-block px-5 py-2.5 text-sm font-bold">
+                  Kembali ke Beranda
+                </Link>
+              )}
+            </div>
+          )
+        ) : (
         <AnimatePresence mode="wait">
           {filtered.length > 0 ? (
             <motion.div
@@ -343,14 +361,14 @@ function ProductsPage() {
               >
                 🔍
               </motion.div>
-              <h3 className="font-display text-xl font-bold text-amber-900/50 mb-2">
+              <h3 className="font-display text-xl font-bold text-ink-muted mb-2">
                 {t.products.notFound}
               </h3>
-              <p className="text-amber-700/45 text-sm mb-5">
+              <p className="text-ink-muted text-sm mb-5">
                 {t.products.notFoundDesc}
               </p>
               <button
-                onClick={() => { setSearchQuery(''); setActiveCategory('semua'); }}
+                onClick={() => { setSearchQuery(''); setActiveCategory('semua'); setSortBy('default'); }}
                 className="btn-primary px-5 py-2.5 text-sm font-bold"
               >
                 {t.products.reset}
@@ -358,6 +376,7 @@ function ProductsPage() {
             </motion.div>
           )}
         </AnimatePresence>
+        )}
       </div>
 
       <Footer />
@@ -369,7 +388,7 @@ function ProductsPage() {
 export default function ProductsPageWrapper() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen" style={{ background: '#FFFBF5' }}>
+      <div className="min-h-screen" style={{ background: 'var(--ground)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-32 md:pb-20">
           <ProductGridSkeleton />
         </div>

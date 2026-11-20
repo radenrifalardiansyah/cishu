@@ -3,7 +3,7 @@ import { unstable_cache } from 'next/cache';
 import { getSql, parseJsonb } from '@/lib/db';
 
 // Angka "terjual" & rating yang ditampilkan di beranda — dihitung dari pesanan
-// selesai (website & kasir online) plus rekap penjualan mitra/reseller, dan
+// selesai (website & kasir online) plus rekap penjualan mitra konsinyasi, dan
 // ulasan yang sudah disetujui admin, bukan angka tetap lagi. Cache 1 jam
 // (lebih longgar dari /api/products) karena statistik ini tidak perlu real-time;
 // admin app bisa memanggil POST /api/revalidate dengan tag "stats" untuk
@@ -22,7 +22,7 @@ const getCachedStats = unstable_cache(
       return sum + items.reduce((s, it) => s + (it.qty ?? 0), 0);
     }, 0);
 
-    // Penjualan mitra/reseller (konsinyasi) direkap terpisah di consignment_recaps (Postgres,
+    // Penjualan mitra konsinyasi (konsinyasi) direkap terpisah di consignment_recaps (Postgres,
     // Tahap 13 migrasi Fase 2), dengan total_sold sudah berupa jumlah unit terjual per rekap.
     const [{ sold }] = await sql<{ sold: string | null }[]>`select coalesce(sum(total_sold), 0) as sold from consignment_recaps`;
     const recapSoldCount = Number(sold) || 0;

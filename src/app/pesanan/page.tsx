@@ -57,17 +57,17 @@ function ReviewCard() {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-amber-100 p-5 mb-6 shadow-sm">
-      <h2 className="font-display font-bold text-amber-950 text-base mb-1">Beri Ulasan</h2>
-      <p className="text-amber-700/50 text-xs mb-4">
+    <div className="bg-white rounded-2xl border border-brand-100 p-5 mb-6 shadow-sm">
+      <h2 className="font-display font-bold text-brand-950 text-base mb-1">Beri Ulasan</h2>
+      <p className="text-ink-muted text-xs mb-4">
         {data.review
           ? (data.review.approved ? 'Ulasan Anda sudah tayang. Bisa diperbarui kapan saja.' : 'Ulasan Anda sedang menunggu persetujuan admin.')
           : 'Bagaimana pengalaman belanja Anda?'}
       </p>
       <div className="flex mb-2">
         {[1, 2, 3, 4, 5].map(i => (
-          <button key={i} type="button" onClick={() => setRating(i)} aria-label={`${i} bintang`} aria-pressed={i === rating} className="w-11 h-11 -mx-0.5 flex items-center justify-center rounded-lg hover:bg-amber-50 transition-colors">
-            <Star size={24} aria-hidden="true" className={i <= rating ? 'text-amber-400 fill-amber-400' : 'text-amber-200 fill-amber-200'} />
+          <button key={i} type="button" onClick={() => setRating(i)} aria-label={`${i} bintang`} aria-pressed={i === rating} className="w-11 h-11 -mx-0.5 flex items-center justify-center rounded-lg hover:bg-brand-50 transition-colors">
+            <Star size={24} aria-hidden="true" className={i <= rating ? 'text-brand-400 fill-brand-400' : 'text-brand-200 fill-brand-200'} />
           </button>
         ))}
       </div>
@@ -116,15 +116,15 @@ function OrderProgress({ order }: { order: Order }) {
   };
 
   return (
-    <div className="px-5 py-3 border-b border-amber-50">
+    <div className="px-5 py-3 border-b border-brand-50">
       <ol className="flex items-start" aria-label="Progres pesanan">
         {steps.map((st, i) => (
           <li key={st.key} aria-current={st.current ? 'step' : undefined} className="flex-1 min-w-0 flex flex-col items-center text-center relative">
             {i > 0 && (
-              <span aria-hidden="true" className={`absolute top-[7px] right-1/2 w-full h-0.5 ${st.done || st.current ? 'bg-amber-400' : 'bg-amber-100'}`} />
+              <span aria-hidden="true" className={`absolute top-[7px] right-1/2 w-full h-0.5 ${st.done || st.current ? 'bg-brand-400' : 'bg-brand-100'}`} />
             )}
-            <span aria-hidden="true" className={`relative w-4 h-4 rounded-full border-2 ${st.done ? 'bg-amber-400 border-amber-400' : st.current ? 'bg-white border-amber-500 ring-2 ring-amber-200' : 'bg-white border-amber-200'}`} />
-            <span className={`mt-1.5 text-[10px] sm:text-xs leading-tight px-0.5 break-words ${st.current ? 'font-bold text-amber-950' : st.done ? 'text-amber-800/70' : 'text-amber-700/40'}`}>
+            <span aria-hidden="true" className={`relative w-4 h-4 rounded-full border-2 ${st.done ? 'bg-brand-400 border-brand-400' : st.current ? 'bg-white border-brand-600 ring-2 ring-brand-200' : 'bg-white border-brand-200'}`} />
+            <span className={`mt-1.5 text-[10px] sm:text-xs leading-tight px-0.5 break-words ${st.current ? 'font-bold text-brand-950' : st.done ? 'text-ink-muted' : 'text-ink-muted'}`}>
               {st.label}
             </span>
           </li>
@@ -177,9 +177,9 @@ export default function OrdersPage() {
         <Navbar />
         <div role="status" aria-live="polite" className="max-w-2xl mx-auto px-4 sm:px-6 pt-28 pb-40 md:pb-20 animate-pulse">
           <span className="sr-only">Memuat...</span>
-          <div className="h-9 w-48 rounded-lg bg-amber-100 mb-3" />
-          <div className="h-4 w-64 max-w-full rounded bg-amber-100/70 mb-8" />
-          <div className="h-36 rounded-2xl bg-amber-100/60" />
+          <div className="h-9 w-48 rounded-lg bg-brand-100 mb-3" />
+          <div className="h-4 w-64 max-w-full rounded bg-brand-100/70 mb-8" />
+          <div className="h-36 rounded-2xl bg-brand-100/60" />
         </div>
       </main>
     );
@@ -191,40 +191,40 @@ export default function OrdersPage() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-28 pb-40 md:pb-20">
         <Link
           href="/products"
-          className="hidden md:inline-flex items-center gap-1.5 text-amber-600/70 hover:text-amber-700 text-sm mb-5 transition-colors"
+          className="hidden md:inline-flex items-center gap-1.5 text-ink-muted hover:text-brand-700 text-sm mb-5 transition-colors"
         >
           <ArrowLeft size={14} /> Kembali ke menu
         </Link>
         <h1 className="font-display text-3xl sm:text-4xl font-bold mb-1">
-          <span className="text-amber-950">Pesanan </span>
+          <span className="text-brand-950">Pesanan </span>
           <span className="gradient-text">Saya</span>
         </h1>
-        <p className="text-amber-800/55 text-sm mb-8">Riwayat & status pesanan akun Anda.</p>
+        <p className="text-ink-muted text-sm mb-8">Riwayat & status pesanan akun Anda.</p>
 
         <ReviewCard />
 
         {orders === null ? (
           <div role="status" aria-live="polite" className="space-y-4 animate-pulse">
             <span className="sr-only">Memuat pesanan...</span>
-            <div className="h-40 rounded-2xl bg-amber-100/60" />
-            <div className="h-40 rounded-2xl bg-amber-100/60" />
+            <div className="h-40 rounded-2xl bg-brand-100/60" />
+            <div className="h-40 rounded-2xl bg-brand-100/60" />
           </div>
         ) : orders.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-amber-100 p-10 text-center shadow-sm">
-            <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-3" aria-hidden="true">
-              <Package size={28} className="text-amber-600" />
+          <div className="bg-white rounded-2xl border border-brand-100 p-10 text-center shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-brand-100 flex items-center justify-center mx-auto mb-3" aria-hidden="true">
+              <Package size={28} className="text-brand-600" />
             </div>
-            <p className="text-amber-800/50 text-sm mb-4">Belum ada pesanan.</p>
+            <p className="text-ink-muted text-sm mb-4">Belum ada pesanan.</p>
             <Link href="/products" className="btn-primary inline-flex items-center justify-center px-5 py-2.5 text-sm font-bold">Lihat Menu</Link>
           </div>
         ) : (
           <div className="space-y-4">
             {orders.map(order => (
-              <div key={order.id} className="bg-white rounded-2xl border border-amber-100 overflow-hidden shadow-sm">
-                <div className="px-5 py-4 border-b border-amber-50 flex items-center justify-between gap-3">
+              <div key={order.id} className="bg-white rounded-2xl border border-brand-100 overflow-hidden shadow-sm">
+                <div className="px-5 py-4 border-b border-brand-50 flex items-center justify-between gap-3">
                   <div>
-                    <p className="font-display font-bold text-amber-950 text-sm">{order.invoiceNo}</p>
-                    <p className="text-amber-700/50 text-xs flex items-center gap-1 mt-0.5">
+                    <p className="font-display font-bold text-brand-950 text-sm">{order.invoiceNo}</p>
+                    <p className="text-ink-muted text-xs flex items-center gap-1 mt-0.5">
                       <Clock size={11} /> {order.date}
                     </p>
                   </div>
@@ -233,25 +233,25 @@ export default function OrdersPage() {
                   </span>
                 </div>
                 <OrderProgress order={order} />
-                <div className="divide-y divide-amber-50">
+                <div className="divide-y divide-brand-50">
                   {order.items.map((it, i) => (
                     <div key={i} className="flex items-center justify-between px-5 py-2.5 text-sm">
-                      <span className="text-amber-900">{it.name} <span className="text-amber-700/50">× {it.qty}</span></span>
-                      <span className="text-amber-700/70">{formatCurrency(it.price * it.qty)}</span>
+                      <span className="text-brand-900">{it.name} <span className="text-ink-muted">× {it.qty}</span></span>
+                      <span className="text-ink-muted">{formatCurrency(it.price * it.qty)}</span>
                     </div>
                   ))}
                 </div>
-                <div className="px-5 py-3 bg-amber-50 flex items-center justify-between">
-                  <span className="text-amber-700/60 text-xs flex items-center gap-1.5">
+                <div className="px-5 py-3 bg-brand-50 flex items-center justify-between">
+                  <span className="text-ink-muted text-xs flex items-center gap-1.5">
                     {order.deliveryMethod === 'pickup' ? <><Package size={12} /> Pickup</> : <><Truck size={12} /> Delivery</>}
                   </span>
-                  <span className="font-display font-bold text-amber-950">{formatCurrency(order.total)}</span>
+                  <span className="font-display font-bold text-brand-950">{formatCurrency(order.total)}</span>
                 </div>
                 {order.paymentStatus === 'belum_lunas' && order.status !== 'dibatalkan' && order.status !== 'selesai' && (
-                  <div className="px-5 py-3 border-t border-amber-50">
+                  <div className="px-5 py-3 border-t border-brand-50">
                     <div className="flex items-center justify-between gap-3">
                       {order.hasProof ? (
-                        <span className="text-amber-700/60 text-xs flex items-center gap-1.5">
+                        <span className="text-ink-muted text-xs flex items-center gap-1.5">
                           <Clock size={12} /> Menunggu verifikasi admin
                         </span>
                       ) : (

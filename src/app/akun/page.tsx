@@ -44,10 +44,10 @@ export default function AkunPage() {
         <Navbar />
         <div role="status" aria-live="polite" className="max-w-md mx-auto px-4 pt-28 pb-40 md:pb-20 animate-pulse">
           <span className="sr-only">Memuat...</span>
-          <div className="h-9 w-40 rounded-lg bg-amber-100 mb-3" />
-          <div className="h-4 w-56 max-w-full rounded bg-amber-100/70 mb-8" />
-          <div className="h-28 rounded-2xl bg-amber-100/60 mb-4" />
-          <div className="h-28 rounded-2xl bg-amber-100/60" />
+          <div className="h-9 w-40 rounded-lg bg-brand-100 mb-3" />
+          <div className="h-4 w-56 max-w-full rounded bg-brand-100/70 mb-8" />
+          <div className="h-28 rounded-2xl bg-brand-100/60 mb-4" />
+          <div className="h-28 rounded-2xl bg-brand-100/60" />
         </div>
       </main>
     );
@@ -102,17 +102,17 @@ export default function AkunPage() {
       <Navbar />
       <div className="max-w-md mx-auto px-4 pt-28 pb-40 md:pb-20">
         <h1 className="font-display text-3xl sm:text-4xl font-bold mb-1">
-          <span className="text-amber-950">Akun </span>
+          <span className="text-brand-950">Akun </span>
           <span className="gradient-text">Saya</span>
         </h1>
-        <p className="text-amber-800/55 text-sm mb-8">Kelola profil & pantau pesanan Anda.</p>
+        <p className="text-ink-muted text-sm mb-8">Kelola profil & pantau pesanan Anda.</p>
 
         {/* Profile card */}
-        <div className="bg-white rounded-2xl border border-amber-100 p-6 shadow-sm mb-4">
+        <div className="bg-white rounded-2xl border border-brand-100 p-6 shadow-sm mb-4">
           <div className="flex items-center gap-4">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-display font-bold flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #D97706, #F59E0B)' }}
+              style={{ background: 'var(--accent-grad)' }}
             >
               {initial}
             </div>
@@ -126,24 +126,24 @@ export default function AkunPage() {
                     maxLength={60}
                     className="min-w-0 flex-1 px-3 py-1.5 rounded-lg input-field text-sm"
                   />
-                  <button onClick={saveName} disabled={savingName} aria-label="Simpan nama" className="before:absolute before:-inset-2 before:content-[''] relative p-1.5 rounded-lg bg-amber-100 text-amber-700 disabled:opacity-50">
+                  <button onClick={saveName} disabled={savingName} aria-label="Simpan nama" className="before:absolute before:-inset-2 before:content-[''] relative p-1.5 rounded-lg bg-brand-100 text-brand-700 disabled:opacity-50">
                     <Check size={16} aria-hidden="true" />
                   </button>
-                  <button onClick={() => setEditingName(false)} aria-label="Batal ubah nama" className="before:absolute before:-inset-2 before:content-[''] relative p-1.5 rounded-lg bg-amber-50 text-amber-500">
+                  <button onClick={() => setEditingName(false)} aria-label="Batal ubah nama" className="before:absolute before:-inset-2 before:content-[''] relative p-1.5 rounded-lg bg-brand-50 text-brand-600">
                     <XIcon size={16} aria-hidden="true" />
                   </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <p className="font-display font-bold text-amber-950 text-lg truncate">{account.name || 'Tanpa nama'}</p>
-                  <button onClick={startEdit} aria-label="Ubah nama" className="before:absolute before:-inset-[15px] before:content-[''] relative text-amber-400 hover:text-amber-600 flex-shrink-0">
+                  <p className="font-display font-bold text-brand-950 text-lg truncate">{account.name || 'Tanpa nama'}</p>
+                  <button onClick={startEdit} aria-label="Ubah nama" className="before:absolute before:-inset-[15px] before:content-[''] relative text-brand-400 hover:text-brand-600 flex-shrink-0">
                     <Pencil size={14} aria-hidden="true" />
                   </button>
                 </div>
               )}
-              <p className="text-amber-700/60 text-sm mt-0.5">+{account.phone}</p>
+              <p className="text-ink-muted text-sm mt-0.5">+{account.phone}</p>
               {memberSince && (
-                <p className="text-amber-700/40 text-xs flex items-center gap-1 mt-1">
+                <p className="text-ink-muted text-xs flex items-center gap-1 mt-1">
                   <Clock size={11} /> Member sejak {memberSince}
                 </p>
               )}
@@ -152,10 +152,10 @@ export default function AkunPage() {
         </div>
 
         {/* Status pesanan */}
-        <div className="bg-white rounded-2xl border border-amber-100 p-5 shadow-sm mb-4">
+        <div className="bg-white rounded-2xl border border-brand-100 p-5 shadow-sm mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-bold text-amber-950 text-sm">Status Pesanan</h2>
-            <Link href="/pesanan" className="text-amber-600 text-xs font-semibold flex items-center gap-0.5">
+            <h2 className="font-display font-bold text-brand-950 text-sm">Status Pesanan</h2>
+            <Link href="/pesanan" className="text-brand-600 text-xs font-semibold flex items-center gap-0.5">
               Lihat semua <ChevronRight size={13} />
             </Link>
           </div>
@@ -164,30 +164,30 @@ export default function AkunPage() {
               <Link
                 key={s.status}
                 href="/pesanan"
-                className="flex flex-col items-center gap-1.5 py-2 rounded-xl hover:bg-amber-50 transition-colors"
+                className="flex flex-col items-center gap-1.5 py-2 rounded-xl hover:bg-brand-50 transition-colors"
               >
                 <span className="relative">
-                  <Package size={22} className="text-amber-700/60" />
+                  <Package size={22} className="text-ink-muted" />
                   {s.count > 0 && (
-                    <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-1">
+                    <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 flex items-center justify-center bg-ink text-white text-[10px] font-bold rounded-full px-1">
                       {s.count > 9 ? '9+' : s.count}
                     </span>
                   )}
                 </span>
-                <span className="text-[11px] text-amber-700/60 font-medium text-center">{s.label}</span>
+                <span className="text-[11px] text-ink-muted font-medium text-center">{s.label}</span>
               </Link>
             ))}
           </div>
         </div>
 
         {/* Menu */}
-        <div className="bg-white rounded-2xl border border-amber-100 overflow-hidden shadow-sm divide-y divide-amber-50 mb-4">
-          <Link href="/pesanan" className="flex items-center gap-3 px-5 py-4 hover:bg-amber-50/60 transition-colors">
-            <Package size={18} className="text-amber-600" />
-            <span className="flex-1 text-sm font-medium text-amber-900">Pesanan Saya</span>
-            <ChevronRight size={16} className="text-amber-300" />
+        <div className="bg-white rounded-2xl border border-brand-100 overflow-hidden shadow-sm divide-y divide-brand-50 mb-4">
+          <Link href="/pesanan" className="flex items-center gap-3 px-5 py-4 hover:bg-brand-50/60 transition-colors">
+            <Package size={18} className="text-brand-600" />
+            <span className="flex-1 text-sm font-medium text-brand-900">Pesanan Saya</span>
+            <ChevronRight size={16} className="text-brand-300" />
           </Link>
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-5 py-4 hover:bg-amber-50/60 transition-colors text-left">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-5 py-4 hover:bg-brand-50/60 transition-colors text-left">
             <LogOut size={18} className="text-red-500" />
             <span className="flex-1 text-sm font-medium text-red-600">Keluar</span>
           </button>

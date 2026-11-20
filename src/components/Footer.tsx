@@ -9,7 +9,6 @@ import { useLiveBranding } from '@/lib/useLiveBranding';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLiveProducts } from '@/lib/useLiveProducts';
 import { useLiveCategories } from '@/lib/useLiveCategories';
-import { categoryData } from '@/lib/products';
 
 export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolean }) {
   const { t, locale } = useLanguage();
@@ -26,31 +25,19 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
     { href: '/panduan', label: t.footer.links.guide },
   ];
 
-  // Mirrors CategoriesSection: the admin's live category collection is the master
-  // data, with the 4 seeded categories only used as an emoji/name fallback and as
-  // a safety net for legacy category ids that never got a Firestore doc.
-  const emojiByName = Object.fromEntries(categoryData.map(c => [c.name.toLowerCase(), c.emoji]));
-  const liveIds = new Set(liveCategories.map(c => c.id));
-  const catNames = t.footer.categories;
-  const liveCards = liveCategories
+  // Kategori dari koleksi admin (data master); hanya yang punya produk.
+  const hasAddress = Boolean(branding.address || branding.city);
+  const hasContact = hasAddress
+    || Boolean(branding.whatsappUrl && branding.whatsappDisplay)
+    || Boolean(branding.instagramUrl && branding.instagramHandle)
+    || Boolean(branding.openHours);
+  const categories = liveCategories
     .filter(c => products.some(p => p.category === c.id))
-    .map(c => ({
-      emoji: c.emoji || emojiByName[c.name.toLowerCase()] || '🏷️',
-      label: catNames[c.id as keyof typeof catNames] ?? c.name,
-      href: `/products?category=${c.id}`,
-    }));
-  const legacyCards = categoryData
-    .filter(c => !liveIds.has(c.id) && products.some(p => p.category === c.id))
-    .map(c => ({
-      emoji: c.emoji,
-      label: catNames[c.id as keyof typeof catNames] ?? c.name,
-      href: `/products?category=${c.id}`,
-    }));
-  const categories = [...liveCards, ...legacyCards];
+    .map(c => ({ emoji: c.emoji || '🏷️', label: c.name, href: `/products?category=${c.id}` }));
   return (
     <>
-    <footer className={`relative bg-amber-800 overflow-hidden ${fullOnMobile ? 'block' : 'hidden md:block'}`}>
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/60 to-transparent" />
+    <footer className={`relative bg-brand-800 overflow-hidden ${fullOnMobile ? 'block' : 'hidden md:block'}`}>
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-500/60 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -62,16 +49,16 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
             className="sm:col-span-2 lg:col-span-1"
           >
             <div className="flex items-center gap-3 mb-4">
-              <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-amber-700/60 shadow-lg flex-shrink-0">
+              <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-brand-700/60 shadow-lg flex-shrink-0">
                 <Image src={branding.logoUrl} alt={branding.brandName} fill sizes="56px" className="object-cover" />
               </div>
               <div>
-                <p className="font-display text-xl font-bold text-amber-200 leading-none">{brandFirstWord}</p>
-                <p className="font-display text-base font-bold gradient-text leading-none">{brandRestWords}</p>
+                <p className="font-display text-xl font-bold text-brand-200 leading-none">{brandFirstWord}</p>
+                <p className="font-display text-base font-bold text-brand-ice leading-none">{brandRestWords}</p>
               </div>
             </div>
             {footerDesc && (
-              <p className="mb-5 max-w-xs text-amber-50/90 text-sm leading-relaxed line-clamp-3">
+              <p className="mb-5 max-w-xs text-brand-50 text-sm leading-relaxed line-clamp-3">
                 {footerDesc}
               </p>
             )}
@@ -98,7 +85,7 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
                 href={branding.shopeeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center border border-orange-400 hover:bg-orange-400 transition-all"
+                className="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center border border-brand-400 hover:bg-brand-400 transition-all"
                 aria-label={`Shopee ${branding.shopeeName}`}
               >
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -117,15 +104,15 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
           >
-            <h4 className="font-display font-bold text-amber-100 mb-4 text-sm">{t.footer.navigation}</h4>
+            <h4 className="font-display font-bold text-brand-100 mb-4 text-sm">{t.footer.navigation}</h4>
             <ul className="space-y-2.5">
               {quickLinks.map(link => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-amber-50/90 hover:text-white text-sm transition-colors flex items-center gap-2 group"
+                    className="text-brand-50 hover:text-white text-sm transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1 h-1 rounded-full bg-amber-700 group-hover:bg-amber-500 transition-colors" />
+                    <span className="w-1 h-1 rounded-full bg-brand-700 group-hover:bg-brand-500 transition-colors" />
                     {link.label}
                   </Link>
                 </li>
@@ -134,19 +121,19 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
           </motion.div>
 
           {/* Categories */}
-          <motion.div
+          {categories.length > 0 && <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.15 }}
           >
-            <h4 className="font-display font-bold text-amber-100 mb-4 text-sm">{t.footer.flavors}</h4>
+            <h4 className="font-display font-bold text-brand-100 mb-4 text-sm">{t.footer.categoriesTitle}</h4>
             <ul className="space-y-2.5">
               {categories.map(cat => (
                 <li key={cat.label}>
                   <Link
                     href={cat.href}
-                    className="text-amber-50/90 hover:text-white text-sm transition-colors flex items-center gap-2"
+                    className="text-brand-50 hover:text-white text-sm transition-colors flex items-center gap-2"
                   >
                     <span>{cat.emoji}</span>
                     {cat.label}
@@ -154,7 +141,7 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
                 </li>
               ))}
             </ul>
-          </motion.div>
+          </motion.div>}
 
           {/* Contact */}
           <motion.div
@@ -163,73 +150,78 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            <h4 className="font-display font-bold text-amber-100 mb-4 text-sm">{t.footer.contact}</h4>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-2.5">
-                <MapPin size={14} className="text-amber-100 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-amber-50/90 text-sm leading-snug">
-                    {branding.address}<br />
-                    {branding.city}
-                  </p>
-                  <a
-                    href={branding.mapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 mt-1.5 text-xs font-semibold text-amber-300 hover:text-white transition-colors"
-                  >
-                    <MapPin size={10} />
-                    {t.footer.mapsLink}
-                  </a>
-                </div>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Phone size={14} className="text-amber-100 flex-shrink-0" />
-                <a
-                  href={branding.whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-amber-50/90 hover:text-white text-sm transition-colors"
-                >
-                  {branding.whatsappDisplay}
-                </a>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Instagram size={14} className="text-amber-100 flex-shrink-0" />
-                <a
-                  href={branding.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-amber-50/90 hover:text-white text-sm transition-colors"
-                >
-                  @{branding.instagramHandle}
-                </a>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Clock size={14} className="text-amber-100 flex-shrink-0" />
-                <span className="text-amber-50/90 text-sm">{t.footer.hours}</span>
-              </li>
-            </ul>
+            <h4 className="font-display font-bold text-brand-100 mb-4 text-sm">{t.footer.contact}</h4>
+            {hasContact ? (
+              <ul className="space-y-3">
+                {hasAddress && (
+                  <li className="flex items-start gap-2.5">
+                    <MapPin size={14} className="text-brand-100 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                    <div>
+                      <p className="text-brand-50 text-sm leading-snug">
+                        {branding.address}
+                        {branding.address && branding.city && <br />}
+                        {branding.city}
+                      </p>
+                      {branding.mapsUrl && (
+                        <a
+                          href={branding.mapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 mt-1.5 text-xs font-semibold text-brand-200 hover:text-white transition-colors"
+                        >
+                          <MapPin size={10} aria-hidden="true" />
+                          {t.footer.mapsLink}
+                        </a>
+                      )}
+                    </div>
+                  </li>
+                )}
+                {branding.whatsappUrl && branding.whatsappDisplay && (
+                  <li className="flex items-center gap-2.5">
+                    <Phone size={14} className="text-brand-100 flex-shrink-0" aria-hidden="true" />
+                    <a href={branding.whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-brand-50 hover:text-white text-sm transition-colors">
+                      {branding.whatsappDisplay}
+                    </a>
+                  </li>
+                )}
+                {branding.instagramUrl && branding.instagramHandle && (
+                  <li className="flex items-center gap-2.5">
+                    <Instagram size={14} className="text-brand-100 flex-shrink-0" aria-hidden="true" />
+                    <a href={branding.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-brand-50 hover:text-white text-sm transition-colors">
+                      @{branding.instagramHandle}
+                    </a>
+                  </li>
+                )}
+                {branding.openHours && (
+                  <li className="flex items-center gap-2.5">
+                    <Clock size={14} className="text-brand-100 flex-shrink-0" aria-hidden="true" />
+                    <span className="text-brand-50 text-sm">{branding.openHours}</span>
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <p className="text-brand-50 text-sm">Informasi kontak segera tersedia.</p>
+            )}
           </motion.div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-amber-600/60 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="mt-12 pt-6 border-t border-brand-600/60 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex flex-col items-center sm:items-start gap-0.5">
-            <p className="text-amber-50/85 text-sm">{t.footer.copyright(branding.brandName)}</p>
-            <p className="text-amber-200/70 text-xs whitespace-nowrap">
+            <p className="text-brand-50 text-sm">{t.footer.copyright(branding.brandName)}</p>
+            <p className="text-brand-200 text-xs whitespace-nowrap">
               {locale === 'en' ? 'Developed by ' : 'Dikembangkan oleh '}
               <a
                 href={DEVELOPER.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-amber-300/80 hover:text-amber-200 transition-colors"
+                className="text-brand-200 hover:text-white transition-colors"
               >
                 {DEVELOPER.name}
               </a>
               {locale === 'en' ? ` · supported by ${DEVELOPER.supportedBy}` : ` · didukung oleh ${DEVELOPER.supportedBy}`}
             </p>
           </div>
-          <div className="flex items-center gap-1.5 text-amber-50/75 text-sm">
+          <div className="flex items-center gap-1.5 text-brand-50 text-sm">
             <span>{t.footer.madeWith}</span>
             <span className="text-red-400">♥</span>
             <span>{t.footer.madeFrom}</span>
@@ -239,19 +231,19 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
     </footer>
 
     {!fullOnMobile && (
-      <div className="block md:hidden bg-amber-800 border-t border-amber-700/50 px-4 py-3 text-center">
-        <p className="text-amber-50/70 text-xs mb-1">{t.footer.copyright(branding.brandName)}</p>
+      <div className="block md:hidden bg-brand-800 border-t border-brand-700/50 px-4 py-3 text-center">
+        <p className="text-brand-50 text-xs mb-1">{t.footer.copyright(branding.brandName)}</p>
         <p className="text-[10px] mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
-          <span className="text-amber-200/50">{locale === 'en' ? 'Developed by ' : 'Dikembangkan oleh '}</span>
+          <span className="text-brand-200">{locale === 'en' ? 'Developed by ' : 'Dikembangkan oleh '}</span>
           <a
             href={DEVELOPER.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-amber-300/70 hover:text-amber-200 transition-colors underline underline-offset-2"
+            className="text-brand-200 hover:text-white transition-colors underline underline-offset-2"
           >
             {DEVELOPER.name}
           </a>
-          <span className="text-amber-200/50">{locale === 'en' ? ` · supported by ${DEVELOPER.supportedBy}` : ` · didukung oleh ${DEVELOPER.supportedBy}`}</span>
+          <span className="text-brand-200">{locale === 'en' ? ` · supported by ${DEVELOPER.supportedBy}` : ` · didukung oleh ${DEVELOPER.supportedBy}`}</span>
         </p>
       </div>
     )}

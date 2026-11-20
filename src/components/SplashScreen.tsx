@@ -3,17 +3,13 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { useLiveBranding } from '@/lib/useLiveBranding';
 
 export default function SplashScreen() {
   // null = belum dicek (cover layar), true = tampilkan, false = sembunyikan
   const [visible, setVisible] = useState<boolean | null>(null);
-  const { t } = useLanguage();
   const branding = useLiveBranding();
-  const [brandFirstWord, ...brandRestWordsArr] = branding.brandName.split(' ');
-  const brandRestWords = brandRestWordsArr.join(' ');
-
+  
   useEffect(() => {
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
@@ -31,7 +27,7 @@ export default function SplashScreen() {
 
   // Cover layar sebelum useEffect selesai — mencegah konten halaman terlihat sekilas
   if (visible === null) {
-    return <div className="fixed inset-0 z-[999]" style={{ background: '#FFFBF5' }} />;
+    return <div className="splash-cover fixed inset-0 z-[999]" />;
   }
 
   return (
@@ -42,14 +38,20 @@ export default function SplashScreen() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: 'easeInOut' }}
           className="fixed inset-0 z-[999] flex flex-col items-center justify-center"
-          style={{ background: '#FFFBF5' }}
+          style={{ background: 'var(--accent-grad)' }}
         >
+          <div aria-hidden="true">
+            <span className="splash-bubble" style={{ width: 180, height: 180, top: '8%', right: '-4%' }} />
+            <span className="splash-bubble" style={{ width: 90, height: 90, bottom: '14%', left: '8%', animationDelay: '-3s' }} />
+            <span className="splash-cube" style={{ width: 44, height: 44, top: '30%', left: '14%', animationDelay: '-5s' }} />
+          </div>
+
           {/* Logo — sudah tampil di splash native Android, jadi di sini diam saja (tidak animasi ulang) supaya menyatu, tidak terasa "muncul dua kali" */}
           <div
-            className="relative w-28 h-28 rounded-full overflow-hidden shadow-2xl mb-6"
-            style={{ border: '4px solid #F59E0B' }}
+            className="relative w-24 h-24 rounded-2xl overflow-hidden shadow-2xl mb-6"
+            style={{ border: '2px solid rgba(255,255,255,0.55)' }}
           >
-            <Image src={branding.logoUrl} alt={branding.brandName} fill sizes="112px" className="object-cover" priority />
+            <Image src={branding.logoUrl} alt={branding.brandName} fill sizes="96px" className="object-cover" priority />
           </div>
 
           {/* Brand name */}
@@ -57,32 +59,13 @@ export default function SplashScreen() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.45 }}
-            className="text-center"
+            className="text-center px-6"
           >
-            <p
-              className="font-display text-3xl font-bold leading-tight"
-              style={{ color: '#78350F' }}
-            >
-              {brandFirstWord}
-            </p>
-            <p
-              className="font-display text-3xl font-bold leading-tight"
-              style={{ background: 'linear-gradient(135deg, #D97706, #F59E0B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-            >
-              {brandRestWords}
-            </p>
+            <p className="font-display text-2xl font-bold text-white leading-tight">{branding.brandName}</p>
+            {branding.tagline && (
+              <p className="text-sm mt-2 text-white">{branding.tagline}</p>
+            )}
           </motion.div>
-
-          {/* Tagline */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.55, duration: 0.4 }}
-            className="text-sm mt-3"
-            style={{ color: '#B45309' }}
-          >
-            {branding.tagline || t.splash.tagline}
-          </motion.p>
 
           {/* Loading dots */}
           <motion.div
@@ -95,7 +78,7 @@ export default function SplashScreen() {
               <motion.div
                 key={i}
                 className="w-2 h-2 rounded-full"
-                style={{ background: '#F59E0B' }}
+                style={{ background: '#FFFFFF' }}
                 animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
                 transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.2 }}
               />

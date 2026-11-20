@@ -25,7 +25,6 @@ export interface InvoiceData {
   discount?:    { amount: number; label: string };
   total:        number;
   logo:         string;
-  halalLogo:    string;
   source?:        'kasir' | 'portal';
   paymentStatus?: 'lunas' | 'belum_lunas';
   // Rekening toko — ditampilkan hanya bila invoice belum lunas (diisi saat render, tidak disimpan).
@@ -34,18 +33,18 @@ export interface InvoiceData {
 
 // ── Colour palette ────────────────────────────────────────────────────────────
 const C = {
-  primary:     '#B45309',
-  primaryDark: '#92400E',
+  primary:     '#C93C55',
+  primaryDark: '#B83A4B',
   accent:      DEFAULT_THEME_COLOR,
-  accentLight: '#FEF3C7',
-  accentMid:   '#FDE68A',
-  lightBg:     '#FFFBF2',
+  accentLight: '#FFEFED',
+  accentMid:   '#FFD9D4',
+  lightBg:     '#FFF5F3',
   white:       '#FFFFFF',
-  dark:        '#1C0A00',
-  body:        '#3D1A00',
-  muted:       '#78350F',
-  border:      '#FCD34D',
-  borderLight: '#FEF3C7',
+  dark:        '#3B2420',
+  body:        '#3B2420',
+  muted:       '#76564D',
+  border:      '#F0D6D2',
+  borderLight: '#FFEFED',
   green:       '#15803D',
   greenLight:  '#DCFCE7',
   gray:        '#6B7280',
@@ -167,11 +166,6 @@ const s = StyleSheet.create({
   paymentKey:   { width: 90, fontSize: 9, fontFamily: 'Helvetica-Bold', color: C.muted },
   paymentVal:   { flex: 1, fontSize: 9, color: C.body },
 
-  // ── Halal badge ───────────────────────────────────────────────────────────
-  halalRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
-  halalImg: { width: 28, height: 28 },
-  halalText:{ fontSize: 8, color: C.green, fontFamily: 'Helvetica-Bold' },
-  halalSub: { fontSize: 7.5, color: C.muted, marginTop: 1 },
 
   // ── Footer ────────────────────────────────────────────────────────────────
   footer: {
@@ -193,7 +187,6 @@ const s = StyleSheet.create({
 
 export default function InvoicePDF({ data, branding }: { data: InvoiceData; branding: LiveBranding }) {
   const brandName = branding.brandName;
-  const region = branding.region || branding.city;
   const itemCount    = data.items.reduce((s, i) => s + i.qty, 0);
   const hasDiscount  = data.discount && data.discount.amount > 0;
   const isKasir      = data.source === 'kasir';
@@ -217,6 +210,8 @@ export default function InvoicePDF({ data, branding }: { data: InvoiceData; bran
         <View style={s.header}>
           <View style={s.headerLeft}>
             <View style={s.logoWrap}>
+              {/* react-pdf Image tidak punya prop alt; logo dekoratif */}
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
               <Image src={data.logo} style={s.logo} />
             </View>
             <View>
@@ -314,7 +309,7 @@ export default function InvoicePDF({ data, branding }: { data: InvoiceData; bran
             </View>
           </View>
 
-          {/* ── Payment info + Halal ────────────────────────────────────── */}
+          {/* ── Payment info ────────────────────────────────────── */}
           <View style={s.paymentBox}>
             {isKasir && showBank && (
               <>
@@ -334,9 +329,11 @@ export default function InvoicePDF({ data, branding }: { data: InvoiceData; bran
                 <Text style={s.paymentTitle}>Informasi Pembayaran</Text>
                 {[
                   ['Transfer ke',   showBank ? bankText : `Bank / e-wallet sesuai kesepakatan dengan ${brandName}`],
-                  ['Konfirmasi',    `Via WhatsApp: ${branding.whatsappDisplay} setelah transfer`],
+                  ...(branding.whatsappDisplay ? [['Konfirmasi', `Via WhatsApp: ${branding.whatsappDisplay} setelah transfer`]] : []),
                   ['Pengiriman',    'Dikirim setelah pembayaran dikonfirmasi'],
-                  ['Pertanyaan',    `WhatsApp: ${branding.whatsappDisplay}${branding.openHours ? ` (${branding.openHours})` : ''}`],
+                  ...((branding.whatsappDisplay || branding.openHours)
+                    ? [['Pertanyaan', [branding.whatsappDisplay && `WhatsApp: ${branding.whatsappDisplay}`, branding.openHours && `(${branding.openHours})`].filter(Boolean).join(' ')]]
+                    : []),
                 ].map(([k, v]) => (
                   <View key={k} style={s.paymentRow}>
                     <Text style={s.paymentKey}>{k}</Text>
@@ -345,14 +342,6 @@ export default function InvoicePDF({ data, branding }: { data: InvoiceData; bran
                 ))}
               </>
             )}
-
-            <View style={s.halalRow}>
-              <Image src={data.halalLogo} style={s.halalImg} />
-              <View>
-                <Text style={s.halalText}>Produk Bersertifikat Halal Indonesia</Text>
-                <Text style={s.halalSub}>Tanpa pengawet · Bahan alami pilihan · Produksi {region}</Text>
-              </View>
-            </View>
           </View>
 
         </View>

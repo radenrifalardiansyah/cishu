@@ -6,7 +6,7 @@ const VALID_TYPES: ClickType[] = ['menu', 'category', 'product', 'addcart'];
 export async function POST(req: NextRequest) {
   try {
     const { type, key } = await req.json() as { type: string; key: string };
-    if (!VALID_TYPES.includes(type as ClickType) || typeof key !== 'string' || !key) {
+    if (!VALID_TYPES.includes(type as ClickType) || typeof key !== 'string' || !key || key.length > 200) {
       return NextResponse.json({ ok: false }, { status: 400 });
     }
     await trackClick(type as ClickType, key);

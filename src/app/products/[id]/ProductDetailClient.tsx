@@ -4,7 +4,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { useLiveProducts } from '@/lib/useLiveProducts';
 import { useLiveCategories, categoryNameById } from '@/lib/useLiveCategories';
 import { useProductSoldCounts } from '@/lib/useProductSoldCounts';
-import { getProductLocale } from '@/lib/product-translations';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCartStore } from '@/lib/store';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
@@ -34,7 +33,7 @@ function translateBadge(badge: string, t: import('@/lib/i18n').Translation): str
 export default function ProductDetailClient() {
   const params = useParams();
   const router = useRouter();
-  const { t, locale } = useLanguage();
+  const { t } = useLanguage();
   const { addItem, openCart } = useCartStore();
   const products = useLiveProducts();
   const categories = useLiveCategories();
@@ -49,12 +48,12 @@ export default function ProductDetailClient() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-amber-50">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-brand-50">
         <span className="text-6xl">😕</span>
-        <p className="text-amber-800 font-semibold">{t.product.notFound}</p>
+        <p className="text-brand-800 font-semibold">{t.product.notFound}</p>
         <button
           onClick={() => router.push('/products')}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-700 text-white font-semibold text-sm"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-700 text-white font-semibold text-sm"
         >
           <ArrowLeft size={16} /> {t.product.back}
         </button>
@@ -62,7 +61,6 @@ export default function ProductDetailClient() {
     );
   }
 
-  const lp = getProductLocale(product.id, locale, product);
   const soldCount = soldCounts[product.id] ?? 0;
   const images = product.images ?? [];
   const hasMultiple = images.length > 1;
@@ -70,7 +68,7 @@ export default function ProductDetailClient() {
   const stockConfig = {
     ready:   { label: t.product.available,  Icon: CheckCircle, color: '#16A34A', bg: 'rgba(22,163,74,0.1)',  border: 'rgba(22,163,74,0.25)'  },
     habis:   { label: t.product.outOfStock, Icon: XCircle,     color: '#DC2626', bg: 'rgba(220,38,38,0.08)', border: 'rgba(220,38,38,0.22)'  },
-    open_po: { label: t.product.openPO,     Icon: Clock3,      color: '#D97706', bg: 'rgba(217,119,6,0.1)',  border: 'rgba(217,119,6,0.25)'  },
+    open_po: { label: t.product.openPO,     Icon: Clock3,      color: 'var(--accent)', bg: 'rgb(var(--brand-600) / 0.1)',  border: 'rgb(var(--brand-600) / 0.25)'  },
   };
   const stock = stockConfig[product.stock];
   const isAvailable = product.stock === 'ready' || product.stock === 'open_po';
@@ -88,7 +86,7 @@ export default function ProductDetailClient() {
   const handleAdd = () => {
     if (!isAvailable) return;
     addItem(product);
-    toast.success(`${lp.name} (${product.weight}) ${t.product.added}!`, { icon: product.emoji });
+    toast.success(`${product.name} (${product.weight}) ${t.product.added}!`, { icon: product.emoji });
     openCart();
   };
 
@@ -102,7 +100,7 @@ export default function ProductDetailClient() {
     <div>
       {/* Main image */}
       <div
-        className="relative bg-white overflow-hidden rounded-none md:rounded-2xl md:border md:border-amber-100 md:shadow-sm"
+        className="relative bg-white overflow-hidden rounded-none md:rounded-2xl md:border md:border-brand-100 md:shadow-sm"
         style={{ height: 'clamp(280px, 55vw, 460px)' }}
       >
         <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${product.gradient} z-10 md:rounded-t-2xl`} />
@@ -126,7 +124,7 @@ export default function ProductDetailClient() {
               >
                 <Image
                   src={images[imgIndex]}
-                  alt={`${lp.name} — ${t.product.imageOf} ${imgIndex + 1}`}
+                  alt={`${product.name} — ${t.product.imageOf} ${imgIndex + 1}`}
                   fill
                   className="object-contain p-6"
                   style={product.stock === 'habis' ? { filter: 'grayscale(40%)' } : {}}
@@ -166,7 +164,7 @@ export default function ProductDetailClient() {
 
       {/* Thumbnails */}
       {hasMultiple && (
-        <div className="bg-white md:bg-transparent border-b border-amber-100 md:border-0 py-3 px-4 flex items-center justify-center gap-3 md:mt-3 md:justify-start">
+        <div className="bg-white md:bg-transparent border-b border-brand-100 md:border-0 py-3 px-4 flex items-center justify-center gap-3 md:mt-3 md:justify-start">
           {images.map((img, i) => (
             <button
               key={i}
@@ -201,10 +199,10 @@ export default function ProductDetailClient() {
             {translateBadge(product.badge, t)}
           </span>
         )}
-        <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+        <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-100 text-brand-700 border border-brand-200">
           <Weight size={10} /> {product.weight}
         </span>
-        <span className="text-xs text-amber-500 capitalize bg-amber-50 border border-amber-100 px-2.5 py-0.5 rounded-full">
+        <span className="text-xs text-brand-600 capitalize bg-brand-50 border border-brand-100 px-2.5 py-0.5 rounded-full">
           {categoryNameById(categories, product.category)}
         </span>
         <span
@@ -216,15 +214,15 @@ export default function ProductDetailClient() {
           {product.stock === 'ready' && typeof product.stockQty === 'number' && ` · ${product.stockQty} pcs`}
         </span>
         {soldCount > 0 && (
-          <span className="text-xs text-amber-500 bg-amber-50 border border-amber-100 px-2.5 py-0.5 rounded-full">
+          <span className="text-xs text-brand-600 bg-brand-50 border border-brand-100 px-2.5 py-0.5 rounded-full">
             {soldCount} {t.product.sold}
           </span>
         )}
       </div>
 
       {/* Name */}
-      <h1 className="font-display text-2xl md:text-3xl font-bold text-amber-950 leading-tight mb-3">
-        {lp.name}
+      <h1 className="font-display text-2xl md:text-3xl font-bold text-brand-950 leading-tight mb-3">
+        {product.name}
       </h1>
 
       {/* Price */}
@@ -234,7 +232,7 @@ export default function ProductDetailClient() {
         </span>
         {product.originalPrice && (
           <>
-            <span className="text-amber-400 text-base line-through">
+            <span className="text-brand-400 text-base line-through">
               {formatCurrency(product.originalPrice)}
             </span>
             <span className="text-xs font-bold text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
@@ -244,19 +242,19 @@ export default function ProductDetailClient() {
         )}
       </div>
 
-      <div className="h-px bg-amber-100 mb-4" />
+      <div className="h-px bg-brand-100 mb-4" />
 
       {/* Description */}
-      <FormattedText text={lp.description} className="text-amber-800/75 text-sm leading-relaxed mb-5" />
+      <FormattedText text={product.description} className="text-ink-2 text-sm leading-relaxed mb-5" />
 
       {/* Details */}
-      <div className="bg-white rounded-2xl border border-amber-100 p-4 mb-6">
-        <h3 className="font-display font-bold text-amber-900 text-sm mb-3">{t.product.detailProduct}</h3>
+      <div className="bg-white rounded-2xl border border-brand-100 p-4 mb-6">
+        <h3 className="font-display font-bold text-brand-900 text-sm mb-3">{t.product.detailProduct}</h3>
         <ul className="space-y-2.5">
-          {lp.details.map((detail, i) => (
+          {product.details.map((detail, i) => (
             <li key={i} className="flex items-start gap-2.5">
               <CheckCircle2 size={14} className="flex-shrink-0 mt-0.5" style={{ color: product.bgColor }} />
-              <span className="text-amber-800/70 text-sm leading-snug">{detail}</span>
+              <span className="text-ink-muted text-sm leading-snug">{detail}</span>
             </li>
           ))}
         </ul>
@@ -280,22 +278,22 @@ export default function ProductDetailClient() {
   );
 
   return (
-    <div className="min-h-screen bg-amber-50">
+    <div className="min-h-screen bg-brand-50">
       <Navbar />
       <Cart />
 
       {/* Mobile sticky top bar */}
-      <div className="sticky top-16 z-30 bg-amber-50/90 backdrop-blur-md border-b border-amber-100 md:hidden">
+      <div className="sticky top-16 z-30 bg-brand-50/90 backdrop-blur-md border-b border-brand-100 md:hidden">
         <div className="flex items-center gap-3 px-4 h-14">
           <button
             onClick={() => router.back()}
             aria-label="Kembali"
-            className="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-amber-200 text-amber-700 flex-shrink-0"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-brand-200 text-brand-700 flex-shrink-0"
           >
             <ArrowLeft size={18} aria-hidden="true" />
           </button>
-          <h2 className="font-display font-bold text-amber-900 text-sm line-clamp-1 flex-1">
-            {lp.name}
+          <h2 className="font-display font-bold text-brand-900 text-sm line-clamp-1 flex-1">
+            {product.name}
           </h2>
         </div>
       </div>
@@ -308,12 +306,12 @@ export default function ProductDetailClient() {
       >
         {/* Desktop breadcrumb */}
         <div className="hidden md:block max-w-5xl mx-auto px-8 pt-6 pb-4">
-          <nav className="flex items-center gap-2 text-sm text-amber-500">
-            <Link href="/" className="hover:text-amber-800 transition-colors">{t.nav.home}</Link>
+          <nav className="flex items-center gap-2 text-sm text-brand-600">
+            <Link href="/" className="hover:text-brand-800 transition-colors">{t.nav.home}</Link>
             <ChevronRight size={14} />
-            <Link href="/products" className="hover:text-amber-800 transition-colors">{t.nav.menu}</Link>
+            <Link href="/products" className="hover:text-brand-800 transition-colors">{t.nav.menu}</Link>
             <ChevronRight size={14} />
-            <span className="text-amber-900 font-medium line-clamp-1">{lp.name}</span>
+            <span className="text-brand-900 font-medium line-clamp-1">{product.name}</span>
           </nav>
         </div>
 
@@ -331,11 +329,11 @@ export default function ProductDetailClient() {
       </motion.main>
 
       {/* Mobile sticky bottom CTA */}
-      <div className="md:hidden fixed left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-amber-100 shadow-lg" style={{ bottom: 'calc(60px + env(safe-area-inset-bottom))' }}>
+      <div className="md:hidden fixed left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-brand-100 shadow-lg" style={{ bottom: 'calc(60px + env(safe-area-inset-bottom))' }}>
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="flex-1">
             {product.originalPrice && (
-              <p className="text-amber-400 text-xs line-through leading-none">
+              <p className="text-brand-400 text-xs line-through leading-none">
                 {formatCurrency(product.originalPrice)}
               </p>
             )}

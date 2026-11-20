@@ -1,4 +1,3 @@
-import type { StaticImageData } from 'next/image';
 import { Product } from '@/types';
 
 // Shape returned by GET /api/products (Postgres product rows, admin-managed).
@@ -26,7 +25,7 @@ const VALID_STOCK = new Set(['ready', 'habis', 'open_po']);
 const VALID_BADGE = new Set(['Popular', 'New', 'Best Seller']);
 
 // Converts a raw product row (Postgres) into the shape returned by GET /api/products.
-// Shared by that route and by the server-side single-product lookup used in generateMetadata.
+// Shared by that route and by the server-side product lookups (lib/server/getProduct.ts).
 export function rawFromDoc(id: string, data: Record<string, unknown>): FireProductRaw {
   return {
     id,
@@ -41,8 +40,8 @@ export function rawFromDoc(id: string, data: Record<string, unknown>): FireProdu
     badge: (data.badge as string) || undefined,
     stock: (data.stock as string) ?? 'habis',
     stockQty: typeof data.stockQty === 'number' ? data.stockQty : undefined,
-    gradient: (data.gradient as string) ?? 'from-amber-700 to-yellow-500',
-    bgColor: (data.bgColor as string) ?? '#B45309',
+    gradient: (data.gradient as string) ?? 'from-rose-600 to-rose-400',
+    bgColor: (data.bgColor as string) ?? '#C93C55',
     weight: (data.weight as string) ?? '',
     order: typeof data.order === 'number' ? data.order : undefined,
     published: data.published as boolean | undefined,
@@ -73,43 +72,15 @@ export function fireToProduct(f: FireProductRaw): Product {
   };
 }
 
-// Overlays a live (Postgres-backed) product onto its static catalog counterpart. The
-// live row is the source of truth for anything an admin can edit (price, stock, name,
-// ...); the static entry's bundled images are kept as a fallback for legacy/seeded
-// products that have no admin-uploaded photos yet.
-export function mergeProduct(base: Product | undefined, f: FireProductRaw | undefined): Product | undefined {
-  if (!f) return base;
-  const live = fireToProduct(f);
-  if (!base) return live;
-  return { ...base, ...live, images: f.imageUrls.length ? f.imageUrls : base.images };
-}
-
-// Merges the static bundled catalog (local optimized images, curated copy) with the
-// live Postgres catalog managed from the admin dashboard. Products that only exist in
-// Postgres (added via the admin panel after the initial seed) are included as-is.
-export function mergeLiveProducts(staticList: Product[], fireList: FireProductRaw[]): Product[] {
-  const publishedFire = fireList.filter(isPublished);
-  const fireById = new Map(publishedFire.map(f => [f.id, f]));
-  // A static product whose live row was explicitly unpublished is hidden
-  // entirely, rather than falling back to the static entry.
-  const unpublishedIds = new Set(fireList.filter(f => !isPublished(f)).map(f => f.id));
-
-  // Curated catalog order is preserved for legacy/seeded products; anything the
-  // admin adds afterwards (not part of the static catalog) is appended at the end,
-  // ordered by the admin's manual `order` field when set.
-  const known = staticList
-    .filter(base => !unpublishedIds.has(base.id))
-    .map(base => mergeProduct(base, fireById.get(base.id)) as Product);
-
-  const knownIds = new Set(staticList.map(p => p.id));
-  const extra = publishedFire
-    .filter(f => !knownIds.has(f.id))
-    .sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999))
+// Katalog toko sepenuhnya berasal dari database (dikelola di cishu-admin): hanya produk yang
+// published, urut menurut `order` admin lalu nama. Tidak ada katalog statis/seed di storefront.
+export function buildLiveProducts(rawList: FireProductRaw[]): Product[] {
+  return rawList
+    .filter(isPublished)
+    .sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999) || a.name.localeCompare(b.name, 'id'))
     .map(fireToProduct);
-
-  return [...known, ...extra];
 }
 
-export function imageSrc(img: StaticImageData | string): string {
-  return typeof img === 'string' ? img : img.src;
+export function imageSrc(img: string): string {
+  return img;
 }

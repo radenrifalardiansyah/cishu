@@ -1,5 +1,3 @@
-import type { StaticImageData } from 'next/image';
-
 export interface Product {
   id: string;
   name: string;
@@ -8,10 +6,10 @@ export interface Product {
   price: number;
   originalPrice?: number;
   emoji: string;
-  images?: (StaticImageData | string)[];
-  // Category doc id (slug) in the admin's `categories` collection — an open set,
-  // not limited to the static catalog's 4 seeded categories. Resolve to a display
-  // name via useLiveCategories(), don't render this raw value directly.
+  // URL gambar (Cloudinary) dari admin.
+  images?: string[];
+  // Category doc id (slug) in the admin's `categories` table — an open set managed by
+  // the admin. Resolve to a display name via useLiveCategories(), don't render this raw value.
   category: string;
   badge?: 'Popular' | 'New' | 'Best Seller';
   stock: 'ready' | 'habis' | 'open_po';

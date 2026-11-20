@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { getSql } from '@/lib/db';
 import { getSessionCustomer } from '@/lib/customerAuth';
 import { notify } from '@/lib/notifications';
@@ -46,18 +46,20 @@ export async function POST(req: NextRequest, ctx: Ctx) {
     if ('res' in result) return result.res;
     if ('already' in result) return NextResponse.json({ ok: true });
 
-    try {
-      await notify({
-        type: 'order_cancelled',
-        title: 'Pesanan dibatalkan pelanggan',
-        message: `Pesanan ${result.row.invoice_no ?? id} dibatalkan oleh ${session.name || session.phone}.`,
-        link: 'orders',
-        entityCollection: 'orders', entityId: id,
-        actorUsername: session.name || session.phone,
-      });
-    } catch (err) {
-      console.error('[api/orders/[id]/cancel] Failed to write notification', err);
-    }
+    after(async () => {
+      try {
+        await notify({
+          type: 'order_cancelled',
+          title: 'Pesanan dibatalkan pelanggan',
+          message: `Pesanan ${result.row.invoice_no ?? id} dibatalkan oleh ${session.name || session.phone}.`,
+          link: 'orders',
+          entityCollection: 'orders', entityId: id,
+          actorUsername: session.name || session.phone,
+        });
+      } catch (err) {
+        console.error('[api/orders/[id]/cancel] Failed to write notification', err);
+      }
+    });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

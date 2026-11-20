@@ -9,7 +9,6 @@ import { useCartStore } from '@/lib/store';
 import { Product } from '@/types';
 import { formatCurrency } from '@/lib/whatsapp';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getProductLocale } from '@/lib/product-translations';
 import { trackClick } from '@/lib/trackClick';
 import { useProductSoldCounts } from '@/lib/useProductSoldCounts';
 import { FormattedText } from '@/lib/formatted-text';
@@ -36,14 +35,13 @@ function translateBadge(badge: string, t: import('@/lib/i18n').Translation): str
 export default function ProductCard({ product, index = 0 }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const { addItem, openCart } = useCartStore();
-  const { t, locale } = useLanguage();
-  const lp = getProductLocale(product.id, locale, product);
+  const { t } = useLanguage();
   const soldCount = useProductSoldCounts()[product.id] ?? 0;
 
   const stockConfig = {
     ready:   { label: t.product.available,  Icon: CheckCircle, color: '#16A34A', bg: 'rgba(22,163,74,0.1)',  border: 'rgba(22,163,74,0.25)'  },
     habis:   { label: t.product.outOfStock, Icon: XCircle,    color: '#DC2626', bg: 'rgba(220,38,38,0.08)', border: 'rgba(220,38,38,0.22)'  },
-    open_po: { label: t.product.openPO,    Icon: Clock3,      color: '#ffffff', bg: 'linear-gradient(135deg, #D97706, #EA580C)', border: 'transparent' },
+    open_po: { label: t.product.openPO,    Icon: Clock3,      color: '#ffffff', bg: 'var(--accent-grad)', border: 'transparent' },
   };
   const [imgIndex, setImgIndex] = useState(0);
   const [imgDir, setImgDir] = useState(1);
@@ -72,7 +70,7 @@ export default function ProductCard({ product, index = 0 }: Props) {
     if (!isAvailable) return;
     addItem(product);
     trackClick('addcart', product.id);
-    toast.success(`${lp.name} (${product.weight}) ${t.product.added}!`, { icon: product.emoji });
+    toast.success(`${product.name} (${product.weight}) ${t.product.added}!`, { icon: product.emoji });
     openCart();
   };
 
@@ -108,7 +106,7 @@ export default function ProductCard({ product, index = 0 }: Props) {
       onMouseLeave={() => { x.set(0); y.set(0); }}
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
       whileHover={{ y: -4 }}
-      className="group relative bg-white rounded-2xl border border-amber-100 overflow-hidden cursor-pointer transition-shadow duration-300 hover:shadow-xl hover:shadow-amber-200/60 hover:border-amber-200 flex flex-col"
+      className="group relative bg-white rounded-2xl border border-brand-100 overflow-hidden cursor-pointer transition-shadow duration-300 hover:shadow-xl hover:shadow-brand-200/60 hover:border-brand-200 flex flex-col"
     >
       {/* Color top bar */}
       <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${product.gradient} z-10`} />
@@ -125,7 +123,7 @@ export default function ProductCard({ product, index = 0 }: Props) {
             {translateBadge(product.badge, t)}
           </motion.span>
         )}
-        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-white/90 text-amber-700 border border-amber-200 shadow-sm">
+        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-white/90 text-brand-700 border border-brand-200 shadow-sm">
           <Weight size={9} />
           {product.weight}
         </span>
@@ -162,7 +160,7 @@ export default function ProductCard({ product, index = 0 }: Props) {
               >
                 <Image
                   src={images[imgIndex]}
-                  alt={lp.name}
+                  alt={product.name}
                   fill
                   className="object-contain p-3 transition-all duration-300"
                   style={product.stock === 'habis' ? { filter: 'grayscale(60%) opacity(0.75)' } : {}}
@@ -227,32 +225,32 @@ export default function ProductCard({ product, index = 0 }: Props) {
 
       <div className="p-4 flex flex-col flex-1">
         {/* Name */}
-        <h3 className="font-display text-base font-bold text-amber-950 leading-tight line-clamp-2 mb-1">
-          {lp.name}
+        <h3 className="font-display text-base font-bold text-brand-950 leading-tight line-clamp-2 mb-1">
+          {product.name}
         </h3>
 
         {/* Description */}
-        <FormattedText text={lp.description} className="text-amber-800/50 text-xs leading-relaxed line-clamp-2 mb-3" />
+        <FormattedText text={product.description} className="text-ink-muted text-xs leading-relaxed line-clamp-2 mb-3" />
 
         {/* Details */}
         <ul className="space-y-1 mb-4 flex-1">
-          {lp.details.slice(0, 3).map((detail, i) => (
+          {product.details.slice(0, 3).map((detail, i) => (
             <li key={i} className="flex items-start gap-1.5">
               <CheckCircle2
                 size={11}
                 className="flex-shrink-0 mt-0.5"
                 style={{ color: product.bgColor }}
               />
-              <span className="text-amber-800/60 text-[11px] leading-snug">{detail}</span>
+              <span className="text-ink-muted text-[11px] leading-snug">{detail}</span>
             </li>
           ))}
         </ul>
 
         {/* Price + Add */}
-        <div className="flex items-end justify-between gap-2 pt-3 border-t border-amber-100">
+        <div className="flex items-end justify-between gap-2 pt-3 border-t border-brand-100">
           <div>
             {product.originalPrice && (
-              <p className="text-amber-500/60 text-xs line-through leading-none mb-0.5">
+              <p className="text-ink-muted text-xs line-through leading-none mb-0.5">
                 {formatCurrency(product.originalPrice)}
               </p>
             )}
@@ -260,7 +258,7 @@ export default function ProductCard({ product, index = 0 }: Props) {
               {formatCurrency(product.price)}
             </p>
             {soldCount > 0 && (
-              <p className="text-amber-800/40 text-[11px] leading-none mt-1">
+              <p className="text-ink-muted text-[11px] leading-none mt-1">
                 {soldCount} {t.product.sold}
               </p>
             )}
@@ -270,7 +268,7 @@ export default function ProductCard({ product, index = 0 }: Props) {
             whileTap={isAvailable ? { scale: 0.92 } : {}}
             onClick={handleAdd}
             disabled={!isAvailable}
-            aria-label={`Tambah ${lp.name} ke keranjang`}
+            aria-label={`Tambah ${product.name} ke keranjang`}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold shadow-md flex-shrink-0 rounded-xl transition-all ${
               isAvailable
                 ? 'btn-primary'

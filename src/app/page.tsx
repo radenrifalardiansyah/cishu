@@ -7,9 +7,8 @@ import CategoriesSection from '@/components/CategoriesSection';
 import BottomNav from '@/components/BottomNav';
 import { absoluteUrl } from '@/lib/branding';
 import { getCachedBranding } from '@/lib/server/branding';
-import { products } from '@/lib/products';
 import { imageSrc } from '@/lib/liveProducts';
-import { getAllMergedProducts, getMergedProduct } from '@/lib/server/getProduct';
+import { getLiveProducts } from '@/lib/server/getProduct';
 import { stripFormatting } from '@/lib/formatted-text';
 
 // Refreshes the featured-product JSON-LD against Postgres periodically, so admin
@@ -22,15 +21,12 @@ const availabilityMap: Record<string, string> = {
   open_po: 'https://schema.org/PreOrder',
 };
 
-const featuredProductIds = ['mk-ori-150', 'mk-pdas-150', 'kk-ori-100', 'kk-bbq-100'];
-
 export default async function HomePage() {
   const branding = await getCachedBranding();
-  const featuredProducts = (
-    await Promise.all(featuredProductIds.map(id => getMergedProduct(id, products)))
-  ).filter((p): p is NonNullable<typeof p> => Boolean(p));
-
-  const allProducts = await getAllMergedProducts(products);
+  const allProducts = await getLiveProducts();
+  // Penawaran JSON-LD: produk yang ditandai Terlaris/Populer di admin, atau 4 produk pertama.
+  const badged = allProducts.filter(p => p.badge === 'Best Seller' || p.badge === 'Popular');
+  const featuredProducts = (badged.length ? badged : allProducts).slice(0, 4);
   const prices = allProducts.map(p => p.price).filter(p => p > 0);
   const priceRange = prices.length
     ? `Rp ${Math.min(...prices).toLocaleString('id-ID')} – Rp ${Math.max(...prices).toLocaleString('id-ID')}`
@@ -65,8 +61,8 @@ export default async function HomePage() {
     image: absoluteUrl(branding.siteUrl, branding.logoUrl),
     address: {
       '@type': 'PostalAddress',
-      streetAddress: branding.address,
-      addressLocality: branding.city,
+      ...(branding.address ? { streetAddress: branding.address } : {}),
+      ...(branding.city ? { addressLocality: branding.city } : {}),
       addressCountry: 'ID',
     },
     sameAs: [branding.instagramUrl, branding.tiktokUrl, branding.shopeeUrl, branding.whatsappUrl].filter(Boolean),
@@ -85,7 +81,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main style={{ background: '#FFFBF5' }}>
+      <main style={{ background: 'var(--ground)' }}>
         <Navbar />
         <Cart />
         <Hero />

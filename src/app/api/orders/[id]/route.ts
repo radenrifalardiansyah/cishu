@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { getSql, parseJsonb } from '@/lib/db';
 import { getSessionCustomer } from '@/lib/customerAuth';
 import { notify } from '@/lib/notifications';
@@ -8,6 +8,15 @@ import { isValidPaymentProofUrl } from '@/lib/payment-proof-url';
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(req: NextRequest, ctx: Ctx) {
+  try {
+    return await getOrder(req, ctx);
+  } catch (err) {
+    console.error('[api/orders/[id] GET]', err);
+    return NextResponse.json({ error: 'db_error' }, { status: 500 });
+  }
+}
+
+async function getOrder(req: NextRequest, ctx: Ctx) {
   const session = await getSessionCustomer(req);
   if (!session) return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
 
@@ -40,12 +49,21 @@ export async function GET(req: NextRequest, ctx: Ctx) {
 // Customer mengisi metode bayar & bukti transfer setelah upload ke Cloudinary
 // (lihat /api/upload-payment-proof) — dipanggil dari halaman /pesanan/[id]/bayar.
 export async function PATCH(req: NextRequest, ctx: Ctx) {
+  try {
+    return await updatePaymentProof(req, ctx);
+  } catch (err) {
+    console.error('[api/orders/[id] PATCH]', err);
+    return NextResponse.json({ error: 'Gagal menyimpan bukti pembayaran. Coba lagi.' }, { status: 500 });
+  }
+}
+
+async function updatePaymentProof(req: NextRequest, ctx: Ctx) {
   const session = await getSessionCustomer(req);
   if (!session) return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
 
   const { id } = await ctx.params;
   const sql = getSql();
-  const body = await req.json() as { paymentMethod?: string; transferBank?: string; transferProofUrl?: string };
+  const body = await req.json().catch(() => ({})) as { paymentMethod?: string; transferBank?: string; transferProofUrl?: string };
   const paymentMethod = body.paymentMethod === 'qris' ? 'qris' : 'transfer';
   const transferProofUrl = (body.transferProofUrl ?? '').toString().trim();
   const transferBank = paymentMethod === 'transfer' ? (body.transferBank ?? '').toString().slice(0, 100) : null;
@@ -82,18 +100,20 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   if ('res' in result) return result.res;
   const row = result.row;
 
-  try {
-    await notify({
-      type: 'payment_proof',
-      title: 'Bukti pembayaran diupload',
-      message: `Pesanan ${row.invoice_no ?? id} sudah upload bukti transfer, menunggu verifikasi.`,
-      link: 'orders',
-      entityCollection: 'orders', entityId: id,
-      actorUsername: session.name || session.phone,
-    });
-  } catch (err) {
-    console.error('[api/orders/[id] PATCH] Failed to write notification', err);
-  }
+  after(async () => {
+    try {
+      await notify({
+        type: 'payment_proof',
+        title: 'Bukti pembayaran diupload',
+        message: `Pesanan ${row.invoice_no ?? id} sudah upload bukti transfer, menunggu verifikasi.`,
+        link: 'orders',
+        entityCollection: 'orders', entityId: id,
+        actorUsername: session.name || session.phone,
+      });
+    } catch (err) {
+      console.error('[api/orders/[id] PATCH] Failed to write notification', err);
+    }
+  });
 
   return NextResponse.json({ ok: true });
 }

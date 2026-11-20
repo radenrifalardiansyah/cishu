@@ -34,6 +34,7 @@ export async function uploadToCloudinary(
   const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/image/upload`, {
     method: 'POST',
     body:   form,
+    signal: AbortSignal.timeout(20_000),
   });
 
   if (!res.ok) {
