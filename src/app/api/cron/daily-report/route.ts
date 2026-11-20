@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAnalyticsStats, PAGE_LABELS } from '@/lib/services/analyticsService';
 import { getCachedBranding } from '@/lib/server/branding';
+import { getNotifyConfig } from '@/lib/server/notify-config';
 
 export async function GET(req: NextRequest) {
   const auth   = req.headers.get('authorization') ?? '';
@@ -11,8 +12,7 @@ export async function GET(req: NextRequest) {
   }
 
   const branding = await getCachedBranding();
-  const apiKey = process.env.CALLMEBOT_API_KEY;
-  const phone  = process.env.NOTIFY_PHONE || branding.whatsappNumber;
+  const { apiKey, phone } = await getNotifyConfig(branding.whatsappNumber);
   if (!apiKey) return NextResponse.json({ error: 'no_callmebot_key' }, { status: 500 });
 
   let stats: Awaited<ReturnType<typeof getAnalyticsStats>>;

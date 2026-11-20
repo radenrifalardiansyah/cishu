@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCachedBranding } from '@/lib/server/branding';
+import { getNotifyConfig } from '@/lib/server/notify-config';
 
 const PAGE_LABELS: Record<string, string> = {
   '/':          'Beranda',
@@ -50,8 +51,7 @@ export async function POST(req: NextRequest) {
     if (!allowNotify(key)) return NextResponse.json({ ok: true, skipped: 'rate_limited' });
 
     const branding = await getCachedBranding();
-    const apiKey = process.env.CALLMEBOT_API_KEY;
-    const phone  = process.env.NOTIFY_PHONE || branding.whatsappNumber;
+    const { apiKey, phone } = await getNotifyConfig(branding.whatsappNumber);
 
     if (!apiKey || !phone) return NextResponse.json({ ok: false, reason: 'no_key' });
 
