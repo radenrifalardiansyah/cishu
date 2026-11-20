@@ -10,7 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useLiveProducts } from '@/lib/useLiveProducts';
 import { useLiveCategories } from '@/lib/useLiveCategories';
 
-export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolean }) {
+export default function Footer() {
   const { t, locale } = useLanguage();
   const branding = useLiveBranding();
   const [brandFirstWord, ...brandRestWordsArr] = branding.brandName.split(' ');
@@ -35,8 +35,7 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
     .filter(c => products.some(p => p.category === c.id))
     .map(c => ({ emoji: c.emoji || '🏷️', label: c.name, href: `/products?category=${c.id}` }));
   return (
-    <>
-    <footer className={`relative bg-brand-800 overflow-hidden ${fullOnMobile ? 'block' : 'hidden md:block'}`}>
+    <footer className="relative bg-brand-800 overflow-hidden hidden md:block [@media(display-mode:standalone)]:hidden">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-500/60 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-10 md:py-14 max-md:pb-28">
@@ -229,24 +228,5 @@ export default function Footer({ fullOnMobile = false }: { fullOnMobile?: boolea
         </div>
       </div>
     </footer>
-
-    {!fullOnMobile && (
-      <div className="footer-strip block md:hidden bg-brand-800 border-t border-brand-700/50 px-4 pt-3 pb-[calc(5rem+env(safe-area-inset-bottom))] text-center">
-        <p className="text-brand-50 text-xs mb-1">{t.footer.copyright(branding.brandName)}</p>
-        <p className="text-[11px] leading-snug mt-0.5">
-          <span className="text-brand-200">{locale === 'en' ? 'Developed by ' : 'Dikembangkan oleh '}</span>
-          <a
-            href={DEVELOPER.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-brand-200 hover:text-white transition-colors underline underline-offset-2"
-          >
-            {DEVELOPER.name}
-          </a>
-          <span className="block text-brand-200">{locale === 'en' ? `supported by ${DEVELOPER.supportedBy}` : `didukung oleh ${DEVELOPER.supportedBy}`}</span>
-        </p>
-      </div>
-    )}
-    </>
   );
 }

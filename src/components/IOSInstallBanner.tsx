@@ -35,11 +35,6 @@ export default function IOSInstallBanner() {
     setTimeout(() => setShow(true), 2000);
   }, []);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('has-install-banner', show);
-    return () => document.documentElement.classList.remove('has-install-banner');
-  }, [show]);
-
   const dismiss = () => {
     setShow(false);
     sessionStorage.setItem('ios_banner_dismissed', '1');
