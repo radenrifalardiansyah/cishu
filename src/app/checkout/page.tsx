@@ -324,10 +324,10 @@ export default function CheckoutPage() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-brand-950 text-sm truncate">{item.product.name}</p>
+                          <p className="font-semibold text-brand-950 text-sm leading-snug line-clamp-2 break-words">{item.product.name}</p>
                           <p className="text-brand-600 text-sm font-bold">{formatCurrency(item.product.price * item.quantity)}</p>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
                           <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} aria-label={`Kurangi jumlah ${item.product.name}`} className="relative before:absolute before:-inset-2 before:content-[''] w-7 h-7 rounded-lg flex items-center justify-center bg-brand-100 hover:bg-brand-200 text-brand-700 border border-brand-200">
                             <Minus size={10} aria-hidden="true" />
                           </button>
@@ -573,10 +573,10 @@ export default function CheckoutPage() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-brand-950 text-sm font-semibold truncate">{item.product.name}</p>
+                        <p className="text-brand-950 text-sm font-semibold leading-snug line-clamp-2 break-words">{item.product.name}</p>
                         <p className="text-ink-muted text-xs">{formatCurrency(item.product.price)} × {item.quantity}</p>
                       </div>
-                      <p className="text-brand-600 text-sm font-bold">{formatCurrency(item.product.price * item.quantity)}</p>
+                      <p className="text-brand-600 text-sm font-bold flex-shrink-0">{formatCurrency(item.product.price * item.quantity)}</p>
                     </div>
                   );})}
                 </div>

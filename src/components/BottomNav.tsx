@@ -59,6 +59,8 @@ export default function BottomNav() {
   const isPathActive = (href: string) =>
     pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
   const isAnyMainActive = mainItems.some(item => isPathActive(item.href));
+  // Checkout dan halaman pesanan adalah kelanjutan alur keranjang, bukan bagian sheet "Semua".
+  const isCartActive = isPathActive('/checkout') || isPathActive('/pesanan');
   const akunHref = account ? '/akun' : '/login';
   const isAkunActive = isPathActive('/akun') || isPathActive('/login');
 
@@ -103,9 +105,18 @@ export default function BottomNav() {
               whileTap={{ scale: 0.88 }}
               onClick={() => { trackClick('menu', 'cart'); toggleCart(); }}
               className="relative flex-1 flex flex-col items-center justify-center py-3 gap-0.5 min-h-[60px]"
+              aria-current={isCartActive ? 'page' : undefined}
             >
+              {isCartActive && (
+                <motion.div
+                  layoutId="bottom-nav-pill"
+                  className="absolute inset-x-3 top-1.5 h-0.5 rounded-full"
+                  style={{ background: 'linear-gradient(90deg, var(--accent), var(--accent-light))' }}
+                  transition={{ type: 'spring', bounce: 0.3, duration: 0.45 }}
+                />
+              )}
               <div className="relative">
-                <ShoppingCart size={22} className={totalItems > 0 ? 'text-brand-600' : 'text-ink-muted'} strokeWidth={totalItems > 0 ? 2.2 : 2} />
+                <ShoppingCart size={22} className={isCartActive ? 'text-brand-600' : 'text-ink-muted'} strokeWidth={isCartActive ? 2.3 : 2} />
                 <AnimatePresence>
                   {totalItems > 0 && (
                     <motion.span
@@ -121,7 +132,7 @@ export default function BottomNav() {
                   )}
                 </AnimatePresence>
               </div>
-              <span className={`text-[10px] font-semibold tracking-tight ${totalItems > 0 ? 'text-brand-600' : 'text-ink-muted'}`}>
+              <span className={`text-[10px] font-semibold tracking-tight ${isCartActive ? 'text-brand-600' : 'text-ink-muted'}`}>
                 {t.nav.cart}
               </span>
             </motion.button>
@@ -129,7 +140,7 @@ export default function BottomNav() {
             {/* Semua / More — highlighted whenever the current page isn't Home/Menu/Akun,
                 since every other route (panduan, kontak, ...) lives inside this sheet */}
             {(() => {
-              const isSemuaActive = !isAnyMainActive && !isAkunActive;
+              const isSemuaActive = !isAnyMainActive && !isAkunActive && !isCartActive;
               return (
                 <motion.button
                   ref={allOpenBtnRef}
