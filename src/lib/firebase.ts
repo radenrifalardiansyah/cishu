@@ -3,9 +3,23 @@ import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 export { FieldValue };
 
+// Service account JSON yang ditempel ke dashboard env (Vercel) sering membawa newline asli di
+// dalam string `private_key`, yang tidak valid untuk JSON.parse ("Bad control character").
+// Coba apa adanya dulu; kalau gagal, escape karakter kontrol hanya di dalam literal string.
+function parseServiceAccount(raw: string): Record<string, unknown> {
+  try {
+    return JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    const fixed = raw.replace(/"(?:[^"\\]|\\.)*"/g, (s) =>
+      s.replace(/\r/g, '\\r').replace(/\n/g, '\\n').replace(/\t/g, '\\t')
+    );
+    return JSON.parse(fixed) as Record<string, unknown>;
+  }
+}
+
 function ensureApp() {
   const raw    = process.env.FIREBASE_SERVICE_ACCOUNT ?? '{}';
-  const parsed = JSON.parse(raw) as Record<string, unknown>;
+  const parsed = parseServiceAccount(raw);
 
   if (!getApps().length && parsed.project_id) {
     initializeApp({ credential: cert(parsed as Parameters<typeof cert>[0]) });
