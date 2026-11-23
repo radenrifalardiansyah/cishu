@@ -3,8 +3,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { signInWithGoogle, completeGoogleRedirectSignIn, type GoogleSignInResult } from '@/lib/googleSignIn';
+import { signInWithGoogle, completeGoogleRedirectSignIn, type GoogleSignInResult, type GoogleSignInErrorReason } from '@/lib/googleSignIn';
 import { useAuth } from '@/contexts/AuthContext';
+
+const ERROR_MESSAGES: Record<GoogleSignInErrorReason | 'unknown', string> = {
+  'not-configured': 'Masuk dengan Google belum dikonfigurasi. Hubungi admin.',
+  'unauthorized-domain': 'Domain ini belum diizinkan untuk masuk dengan Google. Hubungi admin.',
+  'provider-disabled': 'Masuk dengan Google sedang dinonaktifkan. Hubungi admin.',
+  'popup-blocked': 'Popup diblokir browser. Izinkan popup lalu coba lagi.',
+  cancelled: '',
+  network: 'Koneksi bermasalah. Periksa internet Anda lalu coba lagi.',
+  server: 'Server gagal memverifikasi akun Google. Coba lagi sebentar lagi.',
+  unknown: 'Gagal masuk dengan Google.',
+};
 
 export default function GoogleSignInButton({ nextUrl }: { nextUrl: string }) {
   const router = useRouter();
@@ -24,7 +35,9 @@ export default function GoogleSignInButton({ nextUrl }: { nextUrl: string }) {
         return;
       }
       if (result.status === 'redirecting') return;
-      toast.error('Gagal masuk dengan Google.');
+      if (result.reason !== 'cancelled') {
+        toast.error(ERROR_MESSAGES[result.reason] ?? ERROR_MESSAGES.unknown);
+      }
       setLoading(false);
     },
     [nextUrl, refresh, router]

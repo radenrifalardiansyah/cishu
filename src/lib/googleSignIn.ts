@@ -7,7 +7,30 @@ export type GoogleSignInResult =
   | { status: 'ok' }
   | { status: 'needsPhone'; name: string }
   | { status: 'redirecting' }
-  | { status: 'error' };
+  | { status: 'error'; reason: GoogleSignInErrorReason };
+
+export type GoogleSignInErrorReason =
+  | 'not-configured'
+  | 'unauthorized-domain'
+  | 'provider-disabled'
+  | 'popup-blocked'
+  | 'cancelled'
+  | 'network'
+  | 'server'
+  | 'unknown';
+
+function reasonFromError(err: unknown): GoogleSignInErrorReason {
+  const code = typeof err === 'object' && err !== null && 'code' in err ? String((err as { code: unknown }).code) : '';
+  switch (code) {
+    case 'auth/unauthorized-domain': return 'unauthorized-domain';
+    case 'auth/operation-not-allowed': return 'provider-disabled';
+    case 'auth/popup-blocked': return 'popup-blocked';
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request': return 'cancelled';
+    case 'auth/network-request-failed': return 'network';
+    default: return 'unknown';
+  }
+}
 
 // Cukup panjang agar pengguna sempat memilih akun/mengetik password di popup; fallback redirect
 // hanya untuk kasus relay hasil yang diblokir browser.
@@ -45,7 +68,10 @@ async function exchangeForSession(user: User): Promise<GoogleSignInResult> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ idToken }),
   });
-  if (!res.ok) return { status: 'error' };
+  if (!res.ok) {
+    console.error('[exchangeForSession] /api/auth/google', res.status);
+    return { status: 'error', reason: 'server' };
+  }
 
   const data: { ok?: boolean; needsPhone?: boolean; name?: string } = await res.json();
   if (data.needsPhone) return { status: 'needsPhone', name: data.name ?? '' };
@@ -55,7 +81,7 @@ async function exchangeForSession(user: User): Promise<GoogleSignInResult> {
 export async function signInWithGoogle(): Promise<GoogleSignInResult> {
   if (!isGoogleSignInConfigured()) {
     console.error('[signInWithGoogle] NEXT_PUBLIC_FIREBASE_* env vars are not set — see .env.example');
-    return { status: 'error' };
+    return { status: 'error', reason: 'not-configured' };
   }
 
   try {
@@ -69,7 +95,7 @@ export async function signInWithGoogle(): Promise<GoogleSignInResult> {
       return { status: 'redirecting' };
     }
     console.error('[signInWithGoogle]', err);
-    return { status: 'error' };
+    return { status: 'error', reason: reasonFromError(err) };
   }
 }
 
@@ -90,6 +116,6 @@ export async function completeGoogleRedirectSignIn(): Promise<GoogleSignInResult
     return await exchangeForSession(result.user);
   } catch (err) {
     console.error('[completeGoogleRedirectSignIn]', err);
-    return { status: 'error' };
+    return { status: 'error', reason: reasonFromError(err) };
   }
 }
